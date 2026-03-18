@@ -1,0 +1,29 @@
+{
+  "name": "swatch",
+  "version": "1.0.0",
+  "description": "A spatial logic language for drafting, interior design, and generative floor plan visualization.",
+  "type": "module",
+  "main": "src/swatch.js",
+  "scripts": {
+    "test": "c8 mocha 'test/**/*.test.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k-galvin/swatch.git"
+  },
+  "keywords": [
+    "compiler",
+    "dsl",
+    "interior-design",
+    "ohm-js"
+  ],
+  "author": "Kate Galvin",
+  "license": "MIT",
+  "dependencies": {
+    "ohm-js": "^17.5.0"
+  },
+  "devDependencies": {
+    "c8": "^11.0.0",
+    "mocha": "^11.0.1"
+  }
+}
