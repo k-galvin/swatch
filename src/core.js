@@ -19,15 +19,15 @@ export function component(name, params, body) {
 }
 
 export function layout(name, size, body) {
-  return { kind: "Layout", name, size, body };
+  return { kind: "Layout", name, size, body, intrinsic: true };
 }
 
 export function wall(name, from, to, props) {
-  return { kind: "Wall", name, from, to, props };
+  return { kind: "Wall", name, from, to, props, intrinsic: true };
 }
 
 export function furniture(type, at, props) {
-  return { kind: "Furniture", type, at, props };
+  return { kind: "Furniture", type, at, props, intrinsic: true };
 }
 
 export function assignment(target, source) {
