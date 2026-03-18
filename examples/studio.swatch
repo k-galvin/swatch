@@ -1,0 +1,4 @@
+Layout "MyStudio" {
+  Wall NorthWall from [0, 0] to [500, 0]
+  place Sofa at [100, 50]
+}

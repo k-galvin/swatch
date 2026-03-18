@@ -1,0 +1,22 @@
+Swatch {
+  Program     = Layout+
+
+  Layout      = "Layout" string "{" Body "}"
+  Body        = (Wall | Place | Prop)*
+
+  Wall        = "Wall" id "from" Point "to" Point
+  Place       = "place" id "at" Point
+  Prop        = id ":" (Color | num | id)
+  Point       = "[" num "," num "]"
+
+  // Lexical rules (Tokens)
+  Color       = "#" hexDigit hexDigit hexDigit (hexDigit hexDigit hexDigit)?
+  string      = "\"" (~"\"" any)* "\""
+  num         = digit+
+  id          = ~keyword letter alnum*
+  keyword     = "Layout" | "Wall" | "place" | "at"
+
+  // The "Interior Logic" Space
+  comment     = "//" (~"\n" any)*
+  space      += comment
+}
