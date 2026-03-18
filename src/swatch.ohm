@@ -1,29 +1,109 @@
 Swatch {
-  Program   = Metadata? Layout+
-  Metadata  = "Designer" string "Date" string
+  Program   = Metadata? Decl+
   
-  Layout = "Layout" name "size" "[" ListOf<number, ","> "]" "{" (Wall | Furniture)* "}"
+  Metadata  = "Designer" stringlit "Date" stringlit
   
-  name   = string | id
-  
-  Wall      = "Wall" id "from" "[" ListOf<number, ","> "]" "to" "[" ListOf<number, ","> "]" Props?
-  Furniture = "place" id "at" "[" ListOf<number, ","> "]" Props?
-  
-  Props     = "[" ListOf<Prop, ","> "]"
-  Prop      = id ":" (string | number | hex)
-  
-  id        = ~keyword letter (alnum | "_")*
-  
-  keyword   = ("Layout" | "Wall" | "place" | "Designer" | "Date" 
-              | "size" | "at" | "from" | "to") ~(alnum | "_")
-  
-  number    = "-"? digit+ "." digit+  --float
-            | "-"? digit+             --int
-  
-  string    = "\"" (char | "\\\"")* "\""
-  char      = ~"\"" any
-  hex       = "#" hexDigit+
+  Decl      = LayoutDecl
+            | VarDecl
+            | ComponentDecl
+            | Stmt
 
-  comment   = "//" (~"\n" any)*
-  space    += comment
+  VarDecl   = (let_keyword | const_keyword) id "=" Exp ";"
+
+  ComponentDecl = component_keyword id "(" ListOf<Param, ","> ")" Block
+  Param     = id ":" Type
+  
+  LayoutDecl = layout_keyword name size_keyword Point Block
+  
+  Block     = "{" Stmt* "}"
+  
+  Stmt      = WallStmt
+            | PlaceStmt
+            | VarDecl
+            | AssignStmt
+            | LoopStmt
+            | CallStmt
+  
+  WallStmt  = wall_keyword id from_keyword Point to_keyword Point Props?
+  PlaceStmt = place_keyword id at_keyword Point Props?
+  AssignStmt = id "=" Exp ";"
+  CallStmt  = id "(" ListOf<Exp, ","> ")" ";"
+  
+  LoopStmt  = repeat_keyword Exp Block                               -- repeat
+            | for_keyword id in_keyword Exp ("..." | "..<") Exp Block        -- range
+
+  Point     = "[" Exp "," Exp "]"
+  
+  Props     = "[" NonemptyListOf<Prop, ","> "]"
+  Prop      = id ":" Exp
+
+  Exp       = Exp1 "?" Exp1 ":" Exp                          -- conditional
+            | Exp1
+  Exp1      = Exp1 "||" Exp2                                 -- or
+            | Exp2
+  Exp2      = Exp2 "&&" Exp3                                 -- and
+            | Exp3
+  Exp3      = Exp3 relop Exp4                                -- compare
+            | Exp4
+  Exp4      = Exp4 addop Exp5                                -- add
+            | Exp5
+  Exp5      = Exp5 mulop Exp6                                -- multiply
+            | Exp6
+  Exp6      = Exp7 "**" Exp6                                 -- power
+            | Exp7
+  Exp7      = prefixop Exp8                                  -- unary
+            | Exp8
+  Exp8      = true_keyword ~mut
+            | false_keyword ~mut
+            | floatlit ~mut
+            | intlit ~mut
+            | hex ~mut
+            | stringlit ~mut
+            | id "(" ListOf<Exp, ","> ")" ~mut               -- call
+            | id                                             -- id
+            | "(" Exp ")" ~mut                               -- parens
+
+  relop     = "<=" | "<" | "==" | "!=" | ">=" | ">"
+  addop     = "+" | "-"
+  mulop     = "*" | "/" | "%"
+  prefixop  = "-" | "!"
+
+  mut       = ~"==" "=" | "++" | "--"
+  
+  Type      = "number" | "string" | "color" | "boolean"
+
+  intlit      = digit+
+  floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
+  stringlit   = "\"" char* "\""
+  char        = ~control ~"\\" ~"\"" any
+              | "\\" ("n" | "t" | "\"" | "\\")               -- escape
+  control     = "\x00".."\x1f" | "\x80".."\x9f"
+  hex         = "#" hexDigit+
+  
+  true_keyword      = "true" ~alnum
+  false_keyword     = "false" ~alnum
+  let_keyword       = "let" ~alnum
+  const_keyword     = "const" ~alnum
+  repeat_keyword    = "repeat" ~alnum
+  for_keyword       = "for" ~alnum
+  in_keyword        = "in" ~alnum
+  place_keyword     = "place" ~alnum
+  wall_keyword      = "Wall" ~alnum
+  layout_keyword    = "Layout" ~alnum
+  component_keyword = "component" ~alnum
+  from_keyword      = "from" ~alnum
+  to_keyword        = "to" ~alnum
+  at_keyword        = "at" ~alnum
+  size_keyword      = "size" ~alnum
+  
+  keyword   = true_keyword | false_keyword | let_keyword | const_keyword 
+            | repeat_keyword | for_keyword | in_keyword | place_keyword 
+            | wall_keyword | layout_keyword | component_keyword 
+            | from_keyword | to_keyword | at_keyword | size_keyword
+            | "Designer" | "Date"
+
+  id        = ~keyword letter alnum*
+  name      = stringlit | id
+  
+  space    += "//" (~"\n" any)*                              -- comment
 }

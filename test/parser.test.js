@@ -3,40 +3,39 @@ import assert from "node:assert/strict";
 import parse from "../src/parser.js";
 
 const syntaxChecks = [
-  ["minimal layout", "Layout L1 size [100, 100] { }"],
-  [
-    "full metadata",
-    'Designer "Kate" Date "2026-03-17" Layout L1 size [100, 100] { }',
-  ],
-  [
-    "multiple items",
-    "Layout L1 size [500, 500] { Wall W1 from [0, 0] to [10, 10] place C1 at [5, 5] }",
-  ],
-  [
-    "underscores",
-    "Layout Room_One size [100, 100] { Wall Wall_A from [0, 0] to [5, 5] }",
-  ],
-  ["comments", "Layout L1 size [100, 100] { // comment \n }"],
-  ["matches layout with spaces", 'Layout "Main Gallery" size [100, 100] { }'],
+  ["simplest layout", 'Layout "L1" size [100, 100] {}'],
+  ["metadata and layout", 'Designer "Kate" Date "2026-03-18" Layout L1 size [10, 10] {}'],
+  ["variable declarations", "let x = 10; const y = #ff0000;"],
+  ["arithmetic expressions", "let z = (x + 5) * 2 / 3 ** 4;"],
+  ["logical expressions", "let b = true || false && !true;"],
+  ["comparisons", "let c = 5 < 10 == true;"],
+  ["conditional expression", "let d = x > 5 ? 1 : 0;"],
+  ["repeat loop", "Layout L size [100, 100] { repeat 5 { place Chair at [0, 0] } }"],
+  ["range loop", "Layout L size [100, 100] { for i in 1...10 { place Table at [i, i] } }"],
+  ["component declaration", "component Window(w: number, h: number) { Wall W from [0,0] to [w,h] }"],
+  ["function call in expressions", "let x = f(1, 2) + g();"],
+  ["assignment in layout", "Layout L size [10, 10] { x = x + 1; }"],
+  ["complex property", 'place Desk at [0, 0] [color: #aabbcc, label: "Work"]'],
+  ["hex colors", "let c = #abc; let d = #112233;"],
+  ["comments", "// a comment\nLayout L size [0,0] {} // end"],
 ];
 
 const syntaxErrors = [
-  ["missing name", "Layout size [100, 100] { }", /Expected not a keyword/],
-  ["malformed coordinate", "Layout L1 size [100,] { }", /Expected a digit/],
-
-  [
-    "unclosed bracket",
-    "Layout L1 size [100, 100] { Wall W from [0,0 to [1,1] }",
-    /Expected "\]"/,
-  ],
-  ["bad keyword", "Room L1 size [100, 100] { }", /Expected "Layout"/],
+  ["unclosed layout", "Layout L size [10, 10] {", /Line 1, col 25:/],
+  ["missing size", "Layout L { }", /Line 1, col 10:/],
+  ["invalid id", "let 1x = 5;", /Line 1, col 5:/],
+  ["malformed number", "let x = 2.;", /Line 1, col 11:/],
+  ["unbalanced parens", "let x = (1 + 2;", /Line 1, col 15:/],
+  ["missing semicolon", "let x = 5", /Line 1, col 10:/],
+  ["keyword as id", "let place = 5;", /Line 1, col 5:/],
+  ["empty props", "place X at [0,0] []", /Line 1, col 19:/],
+  ["missing type in param", "component C(x) {}", /Line 1, col 14:/],
 ];
 
-describe("The Parser", () => {
+describe("The parser", () => {
   for (const [scenario, source] of syntaxChecks) {
     it(`matches ${scenario}`, () => {
-      const match = parse(source);
-      assert.ok(match.succeeded());
+      assert.ok(parse(source).succeeded());
     });
   }
   for (const [scenario, source, errorMessagePattern] of syntaxErrors) {

@@ -1,7 +1,7 @@
 export default function generate(program) {
   const svgLines = [];
   for (const layout of program.layouts) {
-    const [w, h] = layout.size;
+    const [w, h] = layout.size.map(Number);
     svgLines.push(
       `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`,
     );
@@ -12,17 +12,20 @@ export default function generate(program) {
     for (const item of layout.body) {
       if (item.kind === "Wall") {
         const color = item.props?.color || "black";
-        const weight = item.props?.thickness || 4;
+        const weight = Number(item.props?.thickness || 4);
+        const [x1, y1] = item.from.map(Number);
+        const [x2, y2] = item.to.map(Number);
         svgLines.push(
-          `  <line x1="${item.from[0]}" y1="${item.from[1]}" x2="${item.to[0]}" y2="${item.to[1]}" stroke="${color}" stroke-width="${weight}" stroke-linecap="round" />`,
+          `  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${weight}" stroke-linecap="round" />`,
         );
       } else if (item.kind === "Furniture") {
         const color = item.props?.color || "#3498db";
+        const [cx, cy] = item.at.map(Number);
         svgLines.push(
-          `  <circle cx="${item.at[0]}" cy="${item.at[1]}" r="12" fill="${color}" />`,
+          `  <circle cx="${cx}" cy="${cy}" r="12" fill="${color}" />`,
         );
         svgLines.push(
-          `  <text x="${item.at[0]}" y="${item.at[1] + 25}" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">${item.type}</text>`,
+          `  <text x="${cx}" y="${cy + 25}" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">${item.type}</text>`,
         );
       }
     }
