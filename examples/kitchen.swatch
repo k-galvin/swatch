@@ -1,0 +1,15 @@
+Designer "Chef de Cuisine" Date "2026-03-17"
+
+Layout "Professional Kitchen" size [400, 400] {
+  // Red accent wall for the cooking zone
+  Wall HotZone from [0, 0] to [400, 0] [color: #e74c3c, thickness: 15]
+  
+  // Kitchen Island
+  Wall Island from [150, 150] to [250, 150] [color: #34495e, thickness: 20]
+
+  // Appliances
+  place Stove at [200, 50] [color: #c0392b]
+  place PrepTable at [200, 250] [color: #bdc3c7]
+  place Fridge at [50, 200] [color: #ecf0f1]
+  place Sink at [350, 200] [color: #3498db]
+}

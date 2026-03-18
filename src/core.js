@@ -1,27 +1,15 @@
-export class Program {
-  constructor(layouts) {
-    this.layouts = layouts;
-  }
+export function program(metadata, layouts) {
+  return { kind: "Program", metadata, layouts };
 }
 
-export class Layout {
-  constructor(name, body) {
-    this.name = name;
-    this.body = body;
-  }
+export function layout(name, size, body) {
+  return { kind: "Layout", name, size, body };
 }
 
-export class Wall {
-  constructor(name, from, to) {
-    this.name = name;
-    this.from = from;
-    this.to = to;
-  }
+export function wall(name, from, to, props) {
+  return { kind: "Wall", name, from, to, props };
 }
 
-export class Furniture {
-  constructor(type, at) {
-    this.type = type;
-    this.at = at;
-  }
+export function furniture(type, at, props) {
+  return { kind: "Furniture", type, at, props };
 }

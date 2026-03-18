@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/swatch.js",
   "scripts": {
-    "test": "c8 mocha 'test/**/*.test.js'"
+    "test": "c8 node --test test/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   "author": "Kate Galvin",
   "license": "MIT",
   "dependencies": {
+    "graph-stringify": "^1.1.0",
     "ohm-js": "^17.5.0"
   },
   "devDependencies": {

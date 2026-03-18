@@ -1,22 +1,29 @@
 Swatch {
-  Program     = Layout+
+  Program   = Metadata? Layout+
+  Metadata  = "Designer" string "Date" string
+  
+  Layout = "Layout" name "size" "[" ListOf<number, ","> "]" "{" (Wall | Furniture)* "}"
+  
+  name   = string | id
+  
+  Wall      = "Wall" id "from" "[" ListOf<number, ","> "]" "to" "[" ListOf<number, ","> "]" Props?
+  Furniture = "place" id "at" "[" ListOf<number, ","> "]" Props?
+  
+  Props     = "[" ListOf<Prop, ","> "]"
+  Prop      = id ":" (string | number | hex)
+  
+  id        = ~keyword letter (alnum | "_")*
+  
+  keyword   = ("Layout" | "Wall" | "place" | "Designer" | "Date" 
+              | "size" | "at" | "from" | "to") ~(alnum | "_")
+  
+  number    = "-"? digit+ "." digit+  --float
+            | "-"? digit+             --int
+  
+  string    = "\"" (char | "\\\"")* "\""
+  char      = ~"\"" any
+  hex       = "#" hexDigit+
 
-  Layout      = "Layout" string "{" Body "}"
-  Body        = (Wall | Place | Prop)*
-
-  Wall        = "Wall" id "from" Point "to" Point
-  Place       = "place" id "at" Point
-  Prop        = id ":" (Color | num | id)
-  Point       = "[" num "," num "]"
-
-  // Lexical rules (Tokens)
-  Color       = "#" hexDigit hexDigit hexDigit (hexDigit hexDigit hexDigit)?
-  string      = "\"" (~"\"" any)* "\""
-  num         = digit+
-  id          = ~keyword letter alnum*
-  keyword     = "Layout" | "Wall" | "place" | "at"
-
-  // The "Interior Logic" Space
-  comment     = "//" (~"\n" any)*
-  space      += comment
+  comment   = "//" (~"\n" any)*
+  space    += comment
 }

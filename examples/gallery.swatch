@@ -1,0 +1,10 @@
+Designer "Curator" Date "2026-03-17"
+
+Layout "Main Gallery" size [1200, 800] {
+  Wall PartitionA from [400, 200] to [400, 600] [color: #e74c3c, thickness: 12]
+  Wall PartitionB from [800, 200] to [800, 600] [color: #e74c3c, thickness: 12]
+
+  place Statue1 at [200, 400] [color: #95a5a6]
+  place Statue2 at [1000, 400] [color: #95a5a6]
+  place Fountain at [600, 400] [color: #3498db]
+}

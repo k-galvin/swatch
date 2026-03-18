@@ -1,4 +1,15 @@
-Layout "MyStudio" {
-  Wall NorthWall from [0, 0] to [500, 0]
-  place Sofa at [100, 50]
+Designer "Kate" Date "2026-03-17"
+
+Layout "Studio" size [600, 400] {
+  // Perimeter Walls
+  Wall West  from [0, 0]   to [0, 400]   [thickness: 10]
+  Wall North from [0, 0]   to [600, 0]   [thickness: 10]
+  Wall East  from [600, 0] to [600, 400] [thickness: 10]
+  Wall South from [0, 400] to [600, 400] [thickness: 10]
+
+  // Internal Furniture
+  place QueenBed at [100, 100] [color: #f1c40f]
+  place Desk     at [500, 50]  [color: #7f8c8d]
+  place Sofa     at [300, 350] [color: #2980b9]
+  place TV       at [300, 390] [color: #2c3e50]
 }
