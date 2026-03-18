@@ -58,24 +58,39 @@ export function unary(op, operand, type) {
   return { kind: "UnaryExpression", op, operand, type };
 }
 
-export const floatType = "number";
-export const intType = "number"; // In swatch, numbers are just numbers
-export const stringType = "string";
-export const booleanType = "boolean";
-export const colorType = "color";
-export const voidType = "void";
-export const anyType = "any";
+export const floatType = { kind: "FloatType" };
+export const intType = { kind: "IntType" };
+export const stringType = { kind: "StringType" };
+export const booleanType = { kind: "BooleanType" };
+export const colorType = { kind: "ColorType" };
+export const voidType = { kind: "VoidType" };
+export const anyType = { kind: "AnyType" };
 
 export const standardLibrary = Object.freeze({
+  int: intType,
+  float: floatType,
   number: floatType,
   string: stringType,
   boolean: booleanType,
   color: colorType,
+  any: anyType,
+  void: voidType,
   π: variable("π", false, floatType),
-  // Add some spatial intrinsics
+  WHITE: variable("WHITE", false, colorType),
+  BLACK: variable("BLACK", false, colorType),
+  RED: variable("RED", false, colorType),
+  GREEN: variable("GREEN", false, colorType),
+  BLUE: variable("BLUE", false, colorType),
+  // Spatial intrinsics
   CM: variable("CM", false, floatType),
   INCH: variable("INCH", false, floatType),
+  PT: variable("PT", false, floatType),
 });
+
+// Mark intrinsics
+for (const entity of Object.values(standardLibrary)) {
+  if (entity.kind === "Variable") entity.intrinsic = true;
+}
 
 String.prototype.type = stringType;
 Number.prototype.type = floatType;

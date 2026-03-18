@@ -36,20 +36,34 @@ export default function analyze(match) {
     must(entity, `Identifier ${name} not declared`, at);
   }
 
+  function equivalent(t1, t2) {
+    return t1 === t2 || (!!t1?.kind && t1.kind === t2?.kind);
+  }
+
+  function assignable(from, to) {
+    return (
+      equivalent(from, to) ||
+      (from === core.intType && to === core.floatType) ||
+      to === core.anyType
+    );
+  }
+
   function mustHaveNumericType(e, at) {
-    must(e.type === core.floatType || e.type === core.intType, "Expected a number", at);
+    must(assignable(e.type, core.floatType), "Expected a number", at);
   }
 
   function mustHaveBooleanType(e, at) {
-    must(e.type === core.booleanType, "Expected a boolean", at);
+    must(equivalent(e.type, core.booleanType), "Expected a boolean", at);
   }
 
   function mustBothHaveTheSameType(e1, e2, at) {
-    must(e1.type === e2.type, "Operands do not have the same type", at);
+    must(equivalent(e1.type, e2.type), "Operands do not have the same type", at);
   }
 
   function mustBeAssignable(e, { toType: type }, at) {
-    must(e.type === type || type === core.anyType, `Cannot assign a ${e.type} to a ${type}`, at);
+    const fromStr = e.type.kind.replace("Type", "").toLowerCase();
+    const toStr = type.kind.replace("Type", "").toLowerCase();
+    must(assignable(e.type, type), `Cannot assign a ${fromStr} to a ${toStr}`, at);
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
@@ -118,7 +132,9 @@ export default function analyze(match) {
     },
 
     Type(t) {
-      return t.rep();
+      const type = context.lookup(t.sourceString);
+      mustHaveBeenFound(type, t.sourceString, { at: t });
+      return type;
     },
 
     Block(_open, stmts, _close) {
@@ -205,21 +221,21 @@ export default function analyze(match) {
     Exp3_compare(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.sourceString, v1, v2, core.booleanType);
+      return core.binary(op.rep(), v1, v2, core.booleanType);
     },
 
     Exp4_add(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.sourceString, v1, v2, v1.type);
+      return core.binary(op.rep(), v1, v2, v1.type);
     },
 
     Exp5_multiply(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.sourceString, v1, v2, v1.type);
+      return core.binary(op.rep(), v1, v2, v1.type);
     },
 
     Exp6_power(e1, op, e2) {
@@ -228,7 +244,6 @@ export default function analyze(match) {
       mustBothHaveTheSameType(v1, v2, { at: op });
       return core.binary("**", v1, v2, v1.type);
     },
-
     Exp7_unary(op, e1) {
       const v = e1.rep();
       const opStr = op.sourceString;

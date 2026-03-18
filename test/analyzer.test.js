@@ -23,7 +23,7 @@ const semanticChecks = [
 const semanticErrors = [
   ["redeclared id", "let x = 1; let x = 2;", /Identifier x already declared/],
   ["undeclared id", "x = 1;", /Identifier x not declared/],
-  ["type mismatch assignment", "let x = 1; x = true;", /Cannot assign a boolean to a number/],
+  ["type mismatch assignment", "let x = 1; x = true;", /Cannot assign a boolean to a int/],
   ["non-numeric repeat", 'repeat "5" {}', /Expected a number/],
   ["non-boolean conditional", "let x = 1 ? 2 : 3;", /Expected a boolean/],
   ["duplicate layout", "Layout L size [0,0] {} Layout L size [0,0] {}", /Identifier L already declared/],
