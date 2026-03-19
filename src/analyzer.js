@@ -1,7 +1,12 @@
 import * as core from "./core.js";
 
 class Context {
-  constructor({ parent = null, locals = new Map(), inLoop = false, function: f = null }) {
+  constructor({
+    parent = null,
+    locals = new Map(),
+    inLoop = false,
+    function: f = null,
+  }) {
     Object.assign(this, { parent, locals, inLoop, function: f });
   }
   add(name, entity) {
@@ -11,7 +16,9 @@ class Context {
     return this.locals.get(name) || this.parent?.lookup(name);
   }
   static root() {
-    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) });
+    return new Context({
+      locals: new Map(Object.entries(core.standardLibrary)),
+    });
   }
   newChildContext(props) {
     return new Context({ ...this, ...props, parent: this, locals: new Map() });
@@ -57,13 +64,23 @@ export default function analyze(match) {
   }
 
   function mustBothHaveTheSameType(e1, e2, at) {
-    must(equivalent(e1.type, e2.type) || (assignable(e1.type, core.floatType) && assignable(e2.type, core.floatType)), "Operands do not have the same type", at);
+    must(
+      equivalent(e1.type, e2.type) ||
+        (assignable(e1.type, core.floatType) &&
+          assignable(e2.type, core.floatType)),
+      "Operands do not have the same type",
+      at,
+    );
   }
 
   function mustBeAssignable(e, { toType: type }, at) {
     const fromStr = e.type.kind.replace("Type", "").toLowerCase();
     const toStr = type.kind.replace("Type", "").toLowerCase();
-    must(assignable(e.type, type), `Cannot assign a ${fromStr} to a ${toStr}`, at);
+    must(
+      assignable(e.type, type),
+      `Cannot assign a ${fromStr} to a ${toStr}`,
+      at,
+    );
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
@@ -72,7 +89,7 @@ export default function analyze(match) {
     },
 
     _iter(...children) {
-      return children.map(c => c.rep());
+      return children.map((c) => c.rep());
     },
 
     _terminal() {
@@ -91,7 +108,7 @@ export default function analyze(match) {
       mustNotAlreadyBeDeclared(name, { at: idNode });
       const layoutEntity = core.layout(name);
       context.add(name, layoutEntity);
-      
+
       context = context.newChildContext({ inLoop: false });
       const size = point.rep();
       const body = block.rep();
@@ -102,10 +119,14 @@ export default function analyze(match) {
       return layoutEntity;
     },
 
-    VarDecl(modifier, id, _eq, exp, _semicolon) {
+    VarDecl(modifier, id, _eq, exp) {
       const initializer = exp.rep();
       const mutable = modifier.sourceString === "let";
-      const variable = core.variable(id.sourceString, mutable, initializer.type);
+      const variable = core.variable(
+        id.sourceString,
+        mutable,
+        initializer.type,
+      );
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
@@ -118,7 +139,7 @@ export default function analyze(match) {
       context.add(name, component);
 
       context = context.newChildContext({ inLoop: false });
-      component.params = params.asIteration().children.map(p => p.rep());
+      component.params = params.asIteration().children.map((p) => p.rep());
       component.body = block.rep();
       context = context.parent;
       return core.componentDeclaration(component);
@@ -138,18 +159,23 @@ export default function analyze(match) {
     },
 
     Block(_open, stmts, _close) {
-      return stmts.children.map(s => s.rep());
+      return stmts.children.map((s) => s.rep());
     },
 
     WallStmt(_wall, id, _from, p1, _to, p2, props) {
-      return core.wall(id.sourceString, p1.rep(), p2.rep(), props.rep()[0] ?? {});
+      return core.wall(
+        id.sourceString,
+        p1.rep(),
+        p2.rep(),
+        props.rep()[0] ?? {},
+      );
     },
 
     PlaceStmt(_place, id, _at, p, props) {
       return core.furniture(id.sourceString, p.rep(), props.rep()[0] ?? {});
     },
 
-    AssignStmt(id, _eq, exp, _semicolon) {
+    AssignStmt(id, _eq, exp) {
       const target = context.lookup(id.sourceString);
       mustHaveBeenFound(target, id.sourceString, { at: id });
       const source = exp.rep();
@@ -163,10 +189,13 @@ export default function analyze(match) {
       return core.ifStatement(t, consequent.rep(), alternate.rep()[0] ?? []);
     },
 
-    CallStmt(id, _open, args, _close, _semicolon) {
+    CallStmt(id, _open, args, _close) {
       const callee = context.lookup(id.sourceString);
       mustHaveBeenFound(callee, id.sourceString, { at: id });
-      return core.call(callee, args.asIteration().children.map(a => a.rep()));
+      return core.call(
+        callee,
+        args.asIteration().children.map((a) => a.rep()),
+      );
     },
 
     LoopStmt_repeat(_repeat, exp, block) {
@@ -195,7 +224,9 @@ export default function analyze(match) {
     },
 
     Props(_open, list, _close) {
-      return Object.fromEntries(list.asIteration().children.map(c => c.rep()));
+      return Object.fromEntries(
+        list.asIteration().children.map((c) => c.rep()),
+      );
     },
 
     Prop(id, _colon, exp) {
@@ -233,7 +264,11 @@ export default function analyze(match) {
     Exp4_add(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       const opStr = op.rep();
-      if (opStr === "+" && (equivalent(v1.type, core.stringType) || equivalent(v2.type, core.stringType))) {
+      if (
+        opStr === "+" &&
+        (equivalent(v1.type, core.stringType) ||
+          equivalent(v2.type, core.stringType))
+      ) {
         return core.binary(opStr, v1, v2, core.stringType);
       }
       mustHaveNumericType(v1, { at: e1 });
@@ -264,7 +299,10 @@ export default function analyze(match) {
     Exp8_call(id, _open, args, _close) {
       const callee = context.lookup(id.sourceString);
       mustHaveBeenFound(callee, id.sourceString, { at: id });
-      return core.call(callee, args.asIteration().children.map(a => a.rep()));
+      return core.call(
+        callee,
+        args.asIteration().children.map((a) => a.rep()),
+      );
     },
 
     Exp8_id(id) {
@@ -277,15 +315,31 @@ export default function analyze(match) {
       return exp.rep();
     },
 
-    true_keyword(_) { return true; },
-    false_keyword(_) { return false; },
-    intlit(_) { return BigInt(this.sourceString); },
-    floatlit(_whole, _point, _fraction, _e, _sign, _exponent) { return parseFloat(this.sourceString); },
-    stringlit(_open, _chars, _close) { return this.sourceString.slice(1, -1); },
-    hex(_hash, _digits) { return this.sourceString; },
-    
-    id(_first, _rest) { return this.sourceString; },
-    name(n) { return n.rep(); },
+    true_keyword(_) {
+      return true;
+    },
+    false_keyword(_) {
+      return false;
+    },
+    intlit(_) {
+      return BigInt(this.sourceString);
+    },
+    floatlit(_whole, _point, _fraction, _e, _sign, _exponent) {
+      return parseFloat(this.sourceString);
+    },
+    stringlit(_open, _chars, _close) {
+      return this.sourceString.slice(1, -1);
+    },
+    hex(_hash, _digits) {
+      return this.sourceString;
+    },
+
+    id(_first, _rest) {
+      return this.sourceString;
+    },
+    name(n) {
+      return n.rep();
+    },
   });
 
   return builder(match).rep();

@@ -13,7 +13,9 @@ export default function generate(program) {
 
     switch (node.kind) {
       case "Variable":
-        return context.has(node) ? evaluate(context.get(node), context) : Number(node.value || 0);
+        return context.has(node)
+          ? evaluate(context.get(node), context)
+          : Number(node.value || 0);
       case "BinaryExpression":
         const l = Number(evaluate(node.left, context));
         const r = Number(evaluate(node.right, context));
@@ -29,6 +31,8 @@ export default function generate(program) {
         if (node.op === "!=") return l !== r;
         if (node.op === ">=") return l >= r;
         if (node.op === ">") return l > r;
+        if (node.op === "&&") return l && r;
+        if (node.op === "||") return l || r;
         return 0;
       case "UnaryExpression":
         const v = evaluate(node.operand, context);
@@ -56,7 +60,9 @@ export default function generate(program) {
           if (evaluate(stmt.test, context)) {
             execute(stmt.consequent, context);
           } else {
-            const alt = Array.isArray(stmt.alternate) ? stmt.alternate : [stmt.alternate];
+            const alt = Array.isArray(stmt.alternate)
+              ? stmt.alternate
+              : [stmt.alternate];
             execute(alt, context);
           }
           break;
@@ -115,12 +121,15 @@ export default function generate(program) {
   const globalContext = new Map();
   for (const layout of program.layouts) {
     if (layout.kind === "VariableDeclaration") {
-      globalContext.set(layout.variable, evaluate(layout.initializer, globalContext));
+      globalContext.set(
+        layout.variable,
+        evaluate(layout.initializer, globalContext),
+      );
       continue;
     }
     if (!layout.intrinsic) continue;
     const context = new Map(globalContext);
-    const [w, h] = layout.size.map(s => Number(evaluate(s, context)));
+    const [w, h] = layout.size.map((s) => Number(evaluate(s, context)));
     const layoutId = getTargetName(layout.name || "Layout");
     svgLines.push(
       `<svg id="${layoutId}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`,

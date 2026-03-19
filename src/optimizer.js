@@ -12,10 +12,12 @@ export default function optimize(node) {
       break;
     case "Layout":
       node.size = node.size.map(optimize);
-      node.body = node.body.map(optimize).filter(s => s !== null);
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "ComponentDeclaration":
-      node.component.body = node.component.body.map(optimize).filter(s => s !== null);
+      node.component.body = node.component.body
+        .flatMap(optimize)
+        .filter((s) => s !== null);
       break;
     case "Wall":
       node.from = node.from.map(optimize);
@@ -33,23 +35,28 @@ export default function optimize(node) {
       break;
     case "IfStatement":
       node.test = optimize(node.test);
-      node.consequent = node.consequent.map(optimize).filter(s => s !== null);
-      node.alternate = (Array.isArray(node.alternate) ? node.alternate : [node.alternate])
-        .map(optimize)
-        .filter(s => s !== null);
+      node.consequent = node.consequent
+        .flatMap(optimize)
+        .filter((s) => s !== null);
+      node.alternate = (
+        Array.isArray(node.alternate) ? node.alternate : [node.alternate]
+      )
+        .flatMap(optimize)
+        .filter((s) => s !== null);
       if (node.test === true) return node.consequent;
       if (node.test === false) return node.alternate;
       break;
     case "RepeatStatement":
       node.count = optimize(node.count);
       if (node.count === 0n || node.count === 0) return null;
-      node.body = node.body.map(optimize).filter(s => s !== null);
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "ForRangeStatement":
       node.low = optimize(node.low);
       node.high = optimize(node.high);
-      if (typeof node.low === typeof node.high && node.low === node.high) return null;
-      node.body = node.body.map(optimize).filter(s => s !== null);
+      if (typeof node.low === typeof node.high && node.low === node.high)
+        return null;
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "Conditional":
       node.test = optimize(node.test);
@@ -121,7 +128,10 @@ export default function optimize(node) {
       break;
     case "UnaryExpression":
       node.operand = optimize(node.operand);
-      if (typeof node.operand === "bigint" || typeof node.operand === "number") {
+      if (
+        typeof node.operand === "bigint" ||
+        typeof node.operand === "number"
+      ) {
         if (node.op === "-") return -node.operand;
       }
       if (typeof node.operand === "boolean") {

@@ -2,7 +2,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import optimize from "../src/optimizer.js";
 
-const binary = (op, left, right) => ({ kind: "BinaryExpression", op, left, right });
+const binary = (op, left, right) => ({
+  kind: "BinaryExpression",
+  op,
+  left,
+  right,
+});
 const unary = (op, operand) => ({ kind: "UnaryExpression", op, operand });
 
 describe("The Optimizer", () => {
@@ -70,6 +75,8 @@ describe("The Optimizer", () => {
     assert.deepEqual(optimize(b), b);
     const pos = unary("+", 5n);
     assert.deepEqual(optimize(pos), pos);
+    const complex = unary("-", { kind: "Unknown" });
+    assert.deepEqual(optimize(complex), complex);
   });
 
   it("performs strength reduction", () => {
@@ -105,35 +112,60 @@ describe("The Optimizer", () => {
   });
 
   it("optimizes Program", () => {
-    const program = { kind: "Program", layouts: [{ kind: "Layout", name: "L", size: [100n, 100n], body: [] }] };
+    const program = {
+      kind: "Program",
+      layouts: [{ kind: "Layout", name: "L", size: [100n, 100n], body: [] }],
+    };
     assert.deepEqual(optimize(program), program);
   });
 
   it("optimizes VariableDeclaration", () => {
-    const decl = { kind: "VariableDeclaration", initializer: binary("+", 1n, 1n) };
+    const decl = {
+      kind: "VariableDeclaration",
+      initializer: binary("+", 1n, 1n),
+    };
     const optimized = optimize(decl);
     assert.equal(optimized.initializer, 2n);
   });
 
   it("optimizes Layout", () => {
-    const layout = { 
-        kind: "Layout", 
-        name: "L", 
-        size: [binary("+", 50n, 50n), 100n], 
-        body: [{ kind: "Assignment", target: "x", source: "x" }] 
+    const layout = {
+      kind: "Layout",
+      name: "L",
+      size: [binary("+", 50n, 50n), 100n],
+      body: [
+        { kind: "Assignment", target: "x", source: "x" },
+        {
+          kind: "IfStatement",
+          test: false,
+          consequent: [{ kind: "Wall", name: "W", from: [0, 0], to: [1, 1] }],
+          alternate: [{ kind: "Wall", name: "W", from: [0, 0], to: [2, 2] }],
+        },
+        {
+          kind: "IfStatement",
+          test: true,
+          consequent: [
+            { kind: "Wall", name: "W_TRUE", from: [0, 0], to: [3, 3] },
+          ],
+          alternate: [],
+        },
+      ],
     };
     const optimized = optimize(layout);
     assert.equal(optimized.size[0], 100n);
-    assert.equal(optimized.body.length, 0);
+    // x = x is gone, if(false) is replaced by alternate, if(true) is replaced by consequent
+    assert.equal(optimized.body.length, 2);
+    assert.equal(optimized.body[0].kind, "Wall");
+    assert.equal(optimized.body[1].name, "W_TRUE");
   });
 
   it("optimizes ComponentDeclaration", () => {
     const compDecl = {
-        kind: "ComponentDeclaration",
-        component: {
-            kind: "Component",
-            body: [{ kind: "Assignment", target: "x", source: "x" }]
-        }
+      kind: "ComponentDeclaration",
+      component: {
+        kind: "Component",
+        body: [{ kind: "Assignment", target: "x", source: "x" }],
+      },
     };
     const optimized = optimize(compDecl);
     assert.equal(optimized.component.body.length, 0);
@@ -141,19 +173,19 @@ describe("The Optimizer", () => {
 
   it("optimizes Wall and Furniture", () => {
     const wall = {
-        kind: "Wall",
-        from: [binary("+", 0n, 0n), 0n],
-        to: [10n, 10n],
-        props: { thickness: binary("*", 2n, 2n) }
+      kind: "Wall",
+      from: [binary("+", 0n, 0n), 0n],
+      to: [10n, 10n],
+      props: { thickness: binary("*", 2n, 2n) },
     };
     const optimizedWall = optimize(wall);
     assert.equal(optimizedWall.from[0], 0n);
     assert.equal(optimizedWall.props.thickness, 4n);
 
     const furniture = {
-        kind: "Furniture",
-        at: [binary("+", 5n, 5n), 5n],
-        props: { color: "red" }
+      kind: "Furniture",
+      at: [binary("+", 5n, 5n), 5n],
+      props: { color: "red" },
     };
     const optimizedFurniture = optimize(furniture);
     assert.equal(optimizedFurniture.at[0], 10n);
@@ -169,6 +201,8 @@ describe("The Optimizer", () => {
   it("handles unoptimizable assignments", () => {
     const assign = { kind: "Assignment", target: "x", source: 1n };
     assert.deepEqual(optimize(assign), assign);
+    const selfAssign = { kind: "Assignment", target: "x", source: "x" };
+    assert.equal(optimize(selfAssign), null);
   });
 
   it("handles unoptimizable binary expressions", () => {
@@ -177,12 +211,77 @@ describe("The Optimizer", () => {
   });
 
   it("eliminates dead code in conditionals", () => {
-    const condTrue = { kind: "Conditional", test: true, consequent: "yes", alternate: "no" };
+    const condTrue = {
+      kind: "Conditional",
+      test: true,
+      consequent: "yes",
+      alternate: "no",
+    };
     assert.equal(optimize(condTrue), "yes");
-    const condFalse = { kind: "Conditional", test: false, consequent: "yes", alternate: "no" };
+    const condFalse = {
+      kind: "Conditional",
+      test: false,
+      consequent: "yes",
+      alternate: "no",
+    };
     assert.equal(optimize(condFalse), "no");
-    const condUnknown = { kind: "Conditional", test: "x", consequent: "yes", alternate: "no" };
+    const condUnknown = {
+      kind: "Conditional",
+      test: "x",
+      consequent: "yes",
+      alternate: "no",
+    };
     assert.deepEqual(optimize(condUnknown), condUnknown);
+
+    const ifTrue = {
+      kind: "IfStatement",
+      test: true,
+      consequent: [
+        { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
+      ],
+      alternate: [],
+    };
+    assert.deepEqual(optimize(ifTrue), [
+      { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
+    ]);
+    const ifFalse = {
+      kind: "IfStatement",
+      test: false,
+      consequent: [],
+      alternate: [
+        { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
+      ],
+    };
+    assert.deepEqual(optimize(ifFalse), [
+      { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
+    ]);
+
+    const ifFalseSingle = {
+      kind: "IfStatement",
+      test: false,
+      consequent: [],
+      alternate: {
+        kind: "Wall",
+        name: "W",
+        from: [0, 0],
+        to: [2, 2],
+        props: {},
+      },
+    };
+    assert.deepEqual(optimize(ifFalseSingle), [
+      { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
+    ]);
+
+    const ifUnknown = {
+      kind: "IfStatement",
+      test: "x",
+      consequent: [
+        { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
+      ],
+      alternate: [],
+    };
+    const optimizedIf = optimize(ifUnknown);
+    assert.strictEqual(optimizedIf.kind, "IfStatement");
   });
 
   it("eliminates dead loops", () => {
@@ -190,14 +289,40 @@ describe("The Optimizer", () => {
     assert.equal(optimize(repeatZeroInt), null);
     const repeatZeroFloat = { kind: "RepeatStatement", count: 0, body: [] };
     assert.equal(optimize(repeatZeroFloat), null);
-    const repeatFive = { kind: "RepeatStatement", count: 5n, body: [{ kind: "Assignment", target: "x", source: "x" }] };
+    const repeatFive = {
+      kind: "RepeatStatement",
+      count: 5n,
+      body: [{ kind: "Assignment", target: "x", source: "x" }],
+    };
     assert.equal(optimize(repeatFive).body.length, 0);
-    
-    const rangeEmpty = { kind: "ForRangeStatement", low: 5n, high: 5n, body: [] };
+
+    const rangeEmpty = {
+      kind: "ForRangeStatement",
+      low: 5n,
+      high: 5n,
+      body: [],
+    };
     assert.equal(optimize(rangeEmpty), null);
-    const rangeMismatched = { kind: "ForRangeStatement", low: 5n, high: 5, body: [] };
+    const rangeEmptyFloat = {
+      kind: "ForRangeStatement",
+      low: 5.0,
+      high: 5.0,
+      body: [],
+    };
+    assert.equal(optimize(rangeEmptyFloat), null);
+    const rangeMismatched = {
+      kind: "ForRangeStatement",
+      low: 5n,
+      high: 5,
+      body: [],
+    };
     assert.ok(optimize(rangeMismatched));
-    const rangeFull = { kind: "ForRangeStatement", low: 0n, high: 10n, body: [{ kind: "Assignment", target: "x", source: "x" }] };
+    const rangeFull = {
+      kind: "ForRangeStatement",
+      low: 0n,
+      high: 10n,
+      body: [{ kind: "Assignment", target: "x", source: "x" }],
+    };
     assert.equal(optimize(rangeFull).body.length, 0);
   });
 

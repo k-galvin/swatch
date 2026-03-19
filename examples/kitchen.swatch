@@ -1,7 +1,7 @@
 Designer "Chef de Cuisine" Date "2026-03-18"
 
-const ACCENT = #e74c3c;
-const WOOD = #7e5233;
+const ACCENT = #e74c3c
+const WOOD = #7e5233
 
 component Cabinet(x: number, y: number) {
   place Unit at [x, y] [color: WOOD]
@@ -14,7 +14,7 @@ Layout "Professional Kitchen" size [800, 800] {
   
   // Spread out cabinets
   for i in 0...4 {
-    Cabinet(150 + i * 150, 100);
+    Cabinet(150 + i * 150, 100)
   }
 
   // Island with integrated sink

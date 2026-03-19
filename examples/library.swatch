@@ -1,7 +1,7 @@
 Designer "The Architect" Date "2026-03-18"
 
-const OAK = #7e5233;
-const FELT = #27ae60;
+const OAK = #7e5233
+const FELT = #27ae60
 
 component StudyNook(x: number, y: number) {
   place Table at [x, y] [color: FELT]
@@ -16,14 +16,14 @@ Layout "Great Library" size [1200, 1000] {
 
   // Spread out Bookstack Rows
   for row in 0...2 {
-    let y_base = 200 + row * 250;
+    let y_base = 200 + row * 250
     Wall Stack from [150, y_base] to [700, y_base] [color: OAK, thickness: 30]
   }
 
   // Reading Area Grid
   for i in 0...1 {
     for j in 0...2 {
-      StudyNook(900 + i * 150, 200 + j * 250);
+      StudyNook(900 + i * 150, 200 + j * 250)
     }
   }
 

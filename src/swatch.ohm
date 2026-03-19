@@ -8,7 +8,7 @@ Swatch {
             | ComponentDecl
             | Stmt
 
-  VarDecl   = (let_keyword | const_keyword) id "=" Exp ";"
+  VarDecl   = (let_keyword | const_keyword) id "=" Exp
 
   ComponentDecl = component_keyword id "(" ListOf<Param, ","> ")" Block
   Param     = id ":" Type
@@ -27,9 +27,9 @@ Swatch {
   
   WallStmt  = wall_keyword id from_keyword Point to_keyword Point Props?
   PlaceStmt = place_keyword id at_keyword Point Props?
-  AssignStmt = id "=" Exp ";"
+  AssignStmt = id "=" Exp
   IfStmt    = if_keyword "(" Exp ")" Block (else_keyword (Block | IfStmt))?
-  CallStmt  = id "(" ListOf<Exp, ","> ")" ";"
+  CallStmt  = id "(" ListOf<Exp, ","> ")"
   
   LoopStmt  = repeat_keyword Exp Block                               -- repeat
             | for_keyword id in_keyword Exp ("..." | "..<") Exp Block        -- range

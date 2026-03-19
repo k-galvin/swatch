@@ -1,7 +1,7 @@
 Designer "Kate" Date "2026-03-18"
 
-const STEEL = #7f8c8d;
-const FABRIC = #2980b9;
+const STEEL = #7f8c8d
+const FABRIC = #2980b9
 
 component ModularSofa(x: number, y: number, pieces: number) {
   for p in 0..<pieces {
@@ -25,7 +25,7 @@ Layout "Modern Studio" size [800, 600] {
   place ProChair at [600, 150] [color: #2c3e50]
 
   // Generative Seating
-  ModularSofa(300, 400, 3);
+  ModularSofa(300, 400, 3)
   
   // Media Unit (well within the new 600 height)
   Wall MediaBench from [300, 520] to [500, 520] [color: #333, thickness: 15]

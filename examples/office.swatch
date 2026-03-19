@@ -1,8 +1,8 @@
 Designer "Manager" Date "2026-03-18"
 
-const WIDTH = 1000;
-const HEIGHT = 800;
-let deskColor = #7f8c8d;
+const WIDTH = 1000
+const HEIGHT = 800
+let deskColor = #7f8c8d
 
 component Workstation(x: number, y: number) {
   place Desk at [x, y] [color: deskColor]
@@ -15,7 +15,7 @@ Layout "Office" size [WIDTH, HEIGHT] {
   Wall West from [50, 50] to [50, 750] [thickness: 10]
   
   for i in 0...2 {
-    Workstation(200 + i * 300, 200);
+    Workstation(200 + i * 300, 200)
   }
   
   place ConferenceTable at [500, 500] [color: #f1c40f]
