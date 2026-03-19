@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/swatch.js",
   "scripts": {
-    "test": "c8 node --test test/**/*.test.js"
+    "test": "c8 node --test test/**/*.test.js",
+    "build-examples": "for f in examples/*.swatch; do node src/swatch.js \"$f\" svg > \"${f%.swatch}.svg\"; done"
   },
   "repository": {
     "type": "git",

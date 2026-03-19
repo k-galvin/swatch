@@ -34,6 +34,10 @@ export function assignment(target, source) {
   return { kind: "Assignment", target, source };
 }
 
+export function ifStatement(test, consequent, alternate) {
+  return { kind: "IfStatement", test, consequent, alternate };
+}
+
 export function call(callee, args) {
   return { kind: "Call", callee, args };
 }

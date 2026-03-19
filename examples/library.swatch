@@ -1,19 +1,31 @@
-Designer "The Architect" Date "2026-03-17"
+Designer "The Architect" Date "2026-03-18"
 
-Layout "Library" size [1000, 600] {
-  // Perimeter
-  Wall North from [0, 0] to [1000, 0]
-  Wall South from [0, 600] to [1000, 600]
+const OAK = #7e5233;
+const FELT = #27ae60;
 
-  // Bookstacks (Vertical Walls)
-  Wall Stack1 from [200, 100] to [200, 500] [color: #7e5233, thickness: 10]
-  Wall Stack2 from [400, 100] to [400, 500] [color: #7e5233, thickness: 10]
-  Wall Stack3 from [600, 100] to [600, 500] [color: #7e5233, thickness: 10]
+component StudyNook(x: number, y: number) {
+  place Table at [x, y] [color: FELT]
+  place Chair at [x, y + 40] [color: #333333]
+}
 
-  // Reading Tables
-  place TableA at [800, 150] [color: #27ae60]
-  place TableB at [800, 300] [color: #27ae60]
-  place TableC at [800, 450] [color: #27ae60]
-  
-  place Entrance at [0, 300] [color: #e67e22]
+Layout "Great Library" size [1200, 1000] {
+  // Main Perimeter
+  Wall West from [50, 50] to [50, 950] [thickness: 20]
+  Wall North from [50, 50] to [1150, 50] [thickness: 20]
+  Wall East from [1150, 50] to [1150, 950] [thickness: 20]
+
+  // Spread out Bookstack Rows
+  for row in 0...2 {
+    let y_base = 200 + row * 250;
+    Wall Stack from [150, y_base] to [700, y_base] [color: OAK, thickness: 30]
+  }
+
+  // Reading Area Grid
+  for i in 0...1 {
+    for j in 0...2 {
+      StudyNook(900 + i * 150, 200 + j * 250);
+    }
+  }
+
+  place CircularDesk at [400, 800] [color: #e67e22]
 }

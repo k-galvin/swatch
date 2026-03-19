@@ -31,6 +31,15 @@ export default function optimize(node) {
       node.source = optimize(node.source);
       if (node.target === node.source) return null;
       break;
+    case "IfStatement":
+      node.test = optimize(node.test);
+      node.consequent = node.consequent.map(optimize).filter(s => s !== null);
+      node.alternate = (Array.isArray(node.alternate) ? node.alternate : [node.alternate])
+        .map(optimize)
+        .filter(s => s !== null);
+      if (node.test === true) return node.consequent;
+      if (node.test === false) return node.alternate;
+      break;
     case "RepeatStatement":
       node.count = optimize(node.count);
       if (node.count === 0n || node.count === 0) return null;

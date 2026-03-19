@@ -1,15 +1,27 @@
-Designer "Chef de Cuisine" Date "2026-03-17"
+Designer "Chef de Cuisine" Date "2026-03-18"
 
-Layout "Professional Kitchen" size [400, 400] {
-  // Red accent wall for the cooking zone
-  Wall HotZone from [0, 0] to [400, 0] [color: #e74c3c, thickness: 15]
+const ACCENT = #e74c3c;
+const WOOD = #7e5233;
+
+component Cabinet(x: number, y: number) {
+  place Unit at [x, y] [color: WOOD]
+}
+
+Layout "Professional Kitchen" size [800, 800] {
+  // Perimeter Walls with more space
+  Wall NorthWall from [50, 50] to [750, 50] [color: ACCENT, thickness: 15]
+  Wall WestWall from [50, 50] to [50, 750] [color: ACCENT, thickness: 10]
   
-  // Kitchen Island
-  Wall Island from [150, 150] to [250, 150] [color: #34495e, thickness: 20]
+  // Spread out cabinets
+  for i in 0...4 {
+    Cabinet(150 + i * 150, 100);
+  }
 
-  // Appliances
-  place Stove at [200, 50] [color: #c0392b]
-  place PrepTable at [200, 250] [color: #bdc3c7]
-  place Fridge at [50, 200] [color: #ecf0f1]
-  place Sink at [350, 200] [color: #3498db]
+  // Island with integrated sink
+  Wall Island from [300, 400] to [500, 400] [color: #34495e, thickness: 40]
+  place Sink at [400, 400] [color: #3498db]
+
+  // Balanced appliance placement
+  place Range at [150, 100] [color: #c0392b]
+  place Fridge at [100, 600] [color: #ecf0f1]
 }

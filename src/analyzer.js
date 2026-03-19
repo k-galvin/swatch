@@ -57,7 +57,7 @@ export default function analyze(match) {
   }
 
   function mustBothHaveTheSameType(e1, e2, at) {
-    must(equivalent(e1.type, e2.type), "Operands do not have the same type", at);
+    must(equivalent(e1.type, e2.type) || (assignable(e1.type, core.floatType) && assignable(e2.type, core.floatType)), "Operands do not have the same type", at);
   }
 
   function mustBeAssignable(e, { toType: type }, at) {
@@ -157,6 +157,12 @@ export default function analyze(match) {
       return core.assignment(target, source);
     },
 
+    IfStmt(_if, _open, test, _close, consequent, _else, alternate) {
+      const t = test.rep();
+      mustHaveBooleanType(t, { at: test });
+      return core.ifStatement(t, consequent.rep(), alternate.rep()[0] ?? []);
+    },
+
     CallStmt(id, _open, args, _close, _semicolon) {
       const callee = context.lookup(id.sourceString);
       mustHaveBeenFound(callee, id.sourceString, { at: id });
@@ -226,11 +232,14 @@ export default function analyze(match) {
 
     Exp4_add(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
+      const opStr = op.rep();
+      if (opStr === "+" && (equivalent(v1.type, core.stringType) || equivalent(v2.type, core.stringType))) {
+        return core.binary(opStr, v1, v2, core.stringType);
+      }
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.rep(), v1, v2, v1.type);
+      return core.binary(opStr, v1, v2, v1.type);
     },
-
     Exp5_multiply(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
