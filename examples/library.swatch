@@ -1,31 +1,31 @@
 Designer "The Architect" Date "2026-03-18"
 
-const OAK = #7e5233
-const FELT = #27ae60
+const OAK = #7e5233;
+const FELT = #27ae60;
 
-component StudyNook(x: number, y: number) {
-  place Table at [x, y] [color: FELT]
-  place Chair at [x, y + 40] [color: #333333]
+component StudyNook(x: float, y: float) {
+  place Table at [x, y] [color: FELT];
+  place Chair at [x, y + 40] [color: #333333];
 }
 
 Layout "Great Library" size [1200, 1000] {
   // Main Perimeter
-  Wall West from [50, 50] to [50, 950] [thickness: 20]
-  Wall North from [50, 50] to [1150, 50] [thickness: 20]
-  Wall East from [1150, 50] to [1150, 950] [thickness: 20]
+  Wall West from [50, 50] to [50, 950] [thickness: 20];
+  Wall North from [50, 50] to [1150, 50] [thickness: 20];
+  Wall East from [1150, 50] to [1150, 950] [thickness: 20];
 
   // Spread out Bookstack Rows
-  for row in 0...2 {
-    let y_base = 200 + row * 250
-    Wall Stack from [150, y_base] to [700, y_base] [color: OAK, thickness: 30]
+  for row in 0 ... 2 {
+    let y_base = 200.0 + row * 250.0;
+    Wall Stack from [150, y_base] to [700, y_base] [color: OAK, thickness: 30];
   }
 
   // Reading Area Grid
-  for i in 0...1 {
-    for j in 0...2 {
-      StudyNook(900 + i * 150, 200 + j * 250)
+  for i in 0 ... 1 {
+    for j in 0 ... 2 {
+      StudyNook(900.0 + i * 150.0, 200.0 + j * 250.0);
     }
   }
 
-  place CircularDesk at [400, 800] [color: #e67e22]
+  place CircularDesk at [400, 800] [color: #e67e22];
 }

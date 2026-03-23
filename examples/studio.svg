@@ -1,24 +1,25 @@
 <svg id="Modern Studio_1" width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- Designer: Kate, Date: 2026-03-18 -->
-  <rect width="100%" height="100%" fill="#fafafa" />
-  <line id="North_2" x1="50" y1="50" x2="750" y2="50" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line id="East_3" x1="750" y1="50" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line id="South_4" x1="50" y1="550" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line id="West_5" x1="50" y1="50" x2="50" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <circle id="KingBed_6" cx="150" cy="150" r="12" fill="#f1c40f" />
-  <text x="150" y="175" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">KingBed</text>
-  <line id="Screen_7" x1="280" y1="50" x2="280" y2="250" stroke="#7f8c8d" stroke-width="5" stroke-linecap="round" />
-  <circle id="L_Desk_8" cx="650" cy="150" r="12" fill="#7f8c8d" />
-  <text x="650" y="175" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">L_Desk</text>
-  <circle id="ProChair_9" cx="600" cy="150" r="12" fill="#2c3e50" />
-  <text x="600" y="175" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">ProChair</text>
-  <circle id="Section_10" cx="300" cy="400" r="12" fill="#2980b9" />
-  <text x="300" y="425" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">Section</text>
-  <circle id="Section_11" cx="350" cy="400" r="12" fill="#2980b9" />
-  <text x="350" y="425" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">Section</text>
-  <circle id="Section_12" cx="400" cy="400" r="12" fill="#2980b9" />
-  <text x="400" y="425" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">Section</text>
-  <line id="MediaBench_13" x1="300" y1="520" x2="500" y2="520" stroke="#333" stroke-width="15" stroke-linecap="round" />
-  <circle id="TV_14" cx="400" cy="520" r="12" fill="#000" />
-  <text x="400" y="545" font-family="Arial" font-size="10" text-anchor="middle" fill="#333">TV</text>
+  
+  <text x="10" y="20" font-family="Arial" font-size="12" fill="#999">Designer: Kate | Date: 2026-03-18</text>
+  <rect width="100%" height="100%" fill="#fcfcfc" />
+  <line x1="50" y1="50" x2="750" y2="50" stroke="black" stroke-width="12" stroke-linecap="round" />
+  <line x1="750" y1="50" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
+  <line x1="50" y1="550" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
+  <line x1="50" y1="50" x2="50" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
+  <rect x="135" y="135" width="30" height="30" fill="#f1c40f" rx="4" />
+  <text x="150" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">KingBed</text>
+  <line x1="280" y1="50" x2="280" y2="250" stroke="#7f8c8d" stroke-width="5" stroke-linecap="round" />
+  <rect x="635" y="135" width="30" height="30" fill="#7f8c8d" rx="4" />
+  <text x="650" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">L_Desk</text>
+  <rect x="585" y="135" width="30" height="30" fill="#2c3e50" rx="4" />
+  <text x="600" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">ProChair</text>
+  <rect x="285" y="385" width="30" height="30" fill="#2980b9" rx="4" />
+  <text x="300" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
+  <rect x="335" y="385" width="30" height="30" fill="#2980b9" rx="4" />
+  <text x="350" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
+  <rect x="385" y="385" width="30" height="30" fill="#2980b9" rx="4" />
+  <text x="400" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
+  <line x1="300" y1="520" x2="500" y2="520" stroke="#333333" stroke-width="15" stroke-linecap="round" />
+  <rect x="385" y="505" width="30" height="30" fill="#000000" rx="4" />
+  <text x="400" y="525" font-family="Arial" font-size="8" text-anchor="middle" fill="white">TV</text>
 </svg>

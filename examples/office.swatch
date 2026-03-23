@@ -1,22 +1,22 @@
 Designer "Manager" Date "2026-03-18"
 
-const WIDTH = 1000
-const HEIGHT = 800
-let deskColor = #7f8c8d
+const WIDTH = 1000;
+const HEIGHT = 800;
+let deskColor = #7f8c8d;
 
-component Workstation(x: number, y: number) {
-  place Desk at [x, y] [color: deskColor]
-  place Chair at [x, y + 60] [color: #2c3e50]
+component Workstation(x: float, y: float) {
+  place Desk at [x, y] [color: deskColor];
+  place Chair at [x, y + 60] [color: #2c3e50];
 }
 
 Layout "Office" size [WIDTH, HEIGHT] {
   // Walls with padding
-  Wall North from [50, 50] to [950, 50] [thickness: 10]
-  Wall West from [50, 50] to [50, 750] [thickness: 10]
+  Wall North from [50, 50] to [950, 50] [thickness: 10];
+  Wall West from [50, 50] to [50, 750] [thickness: 10];
   
-  for i in 0...2 {
-    Workstation(200 + i * 300, 200)
+  for i in 0 ... 2 {
+    Workstation(200.0 + i * 300.0, 200.0);
   }
   
-  place ConferenceTable at [500, 500] [color: #f1c40f]
+  place ConferenceTable at [500, 500] [color: #f1c40f];
 }

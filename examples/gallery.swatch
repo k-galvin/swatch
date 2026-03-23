@@ -1,23 +1,23 @@
 Designer "Curator" Date "2026-03-18"
 
-const WALL_COLOR = #e74c3c
-const STATUE_COLOR = #95a5a6
+const WALL_COLOR = #e74c3c;
+const STATUE_COLOR = #95a5a6;
 
-component DisplayPedestal(x: number, y: number, label: string) {
-  place Pedestal at [x, y] [color: #ecf0f1]
-  place Art at [x, y] [color: STATUE_COLOR, label: label]
+component DisplayPedestal(x: float, y: float, label: string) {
+  place Pedestal at [x, y] [color: #ecf0f1];
+  place Art at [x, y] [color: STATUE_COLOR, label: label];
 }
 
 Layout "Main Gallery" size [1200, 800] {
   // Main structural partitions
-  Wall PartitionA from [400, 200] to [400, 600] [color: WALL_COLOR, thickness: 12]
-  Wall PartitionB from [800, 200] to [800, 600] [color: WALL_COLOR, thickness: 12]
+  Wall PartitionA from [400, 200] to [400, 600] [color: WALL_COLOR, thickness: 12];
+  Wall PartitionB from [800, 200] to [800, 600] [color: WALL_COLOR, thickness: 12];
 
   // Generative installation along the north wall (shifted down to avoid clipping)
-  for i in 0...4 {
-    let x_pos = 200 + i * 200
-    DisplayPedestal(x_pos, 150, "Exhibit " + (i + 1))
+  for i in 0 ... 4 {
+    let x_pos = 200.0 + i * 200.0;
+    DisplayPedestal(x_pos, 150.0, "Exhibit " + (i + 1));
   }
 
-  place Fountain at [600, 400] [color: #3498db]
+  place Fountain at [600, 400] [color: #3498db];
 }

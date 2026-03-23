@@ -4,80 +4,78 @@ import parse from "../src/parser.js";
 import analyze from "../src/analyzer.js";
 
 const semanticChecks = [
-  ["variable declarations", "let x = 10 const y = #ff0000"],
+  ["variables can be printed", "let x = 1; print(x);"],
+  ["variables can be reassigned", "let x = 1; x = x + 1;"],
   [
-    "complex layout",
-    'Layout "L1" size [100, 100] { Wall W from [0,0] to [10,10] }',
-  ],
-  ["arithmetic", "let z = (5 + 5) * 2 / 3 % 4 ** 5 - 1"],
-  ["logical ops", "let b = true || false && !true"],
-  ["comparisons", "let c = 5 < 10 == true != (3 >= 2) let d = 1 > 0"],
-  [
-    "repeat loop",
-    "Layout L size [10, 10] { repeat 5 { place Chair at [0,0] } }",
+    "all numeric types are float-compatible",
+    "let x = 1; let y = 2.5; let z = x + y;",
   ],
   [
-    "range loop",
-    "Layout L size [10, 10] { for i in 1...10 { place Table at [i, i] } }",
+    "walls use points and props",
+    "Wall w from [0,0] to [10,10] [thickness: 5];",
   ],
+  ["place uses points and props", "place Chair at [5,5] [color: #FF0000];"],
+  ["conditionals work", "if (true) { let x = 1; } else { let x = 2; }"],
+  ["loops work", "repeat 5 { let x = 1; }"],
+  ["range loops work", "for i in 0 ... 10 { print(i); }"],
+  ["arrays work", "let a = [1, 2, 3];"],
+  ["hex colors work", "let c = #AABBCC;"],
+  ["ternary operators work", "let x = true ? 1 : 2;"],
+  ["metadata is optional", 'Designer "Alice" Date "2026-03-23" let x = 1;'],
+  ["false literal works", "let x = false;"],
   [
-    "component and call",
-    "component W(x: number) { Wall W1 from [0,0] to [x,x] } Layout L size [10,10] { W(5) }",
+    "function call in expressions works",
+    "component f(x: float) { print(x); } let y = f(1.0);",
   ],
-  ["conditional", "let x = true ? 1 : 0"],
-  ["assignment", "let x = 1 Layout L size [10,10] { x = 2 }"],
-  ["all types", 'let s = "hi" let c = #abc let b = false let n = 1.0'],
-  ["metadata", 'Designer "Kate" Date "2026-03-18" Layout L size [0,0] {}'],
-  ["id expression", "let x = 1 let y = x"],
-  [
-    "call in expression",
-    "component F(x: number) { } Layout L size [1,1] { let y = F(5) }",
-  ],
-  ["string concatenation", 'let s = "hello " + "world"'],
-  ["numeric addition", "let n = 1 + 2"],
-  ["unary logical not", "let b = !true"],
+  ["optional types work", "let x: float? = 1.0;"],
+  ["array length works", "let x = #[1, 2, 3];"],
+  ["random works", "let x = random [1, 2, 3];"],
+  ["any type assignment", 'let x: any = 5; x = "hello";'],
+  ["string concatenation", 'let x = "a" + "b"; let y = "a" + 5; let z = 5 + "b";'],
+  ["empty array literal", "let x = [];"],
+  ["array type declaration", "let x: [float] = [1.0];"],
+  ["optional type equivalence", "let x: float? = 1.0; let y: float? = 2.0; let z = x == y;"],
+  ["component call in expression", "component C() {} let x = C();"],
+  ["print call in expression", "let x = print(1);"],
 ];
 
 const semanticErrors = [
-  ["redeclared id", "let x = 1 let x = 2", /Identifier x already declared/],
-  ["undeclared id", "x = 1", /Identifier x not declared/],
+  ["using undeclared variables", "print(y);", /Identifier y not declared/],
   [
-    "type mismatch assignment",
-    "let x = 1 x = true",
-    /Cannot assign a boolean to a int/,
-  ],
-  ["non-numeric repeat", 'repeat "5" {}', /Expected a number/],
-  ["non-boolean conditional", "let x = 1 ? 2 : 3", /Expected a boolean/],
-  [
-    "duplicate layout",
-    "Layout L size [0,0] {} Layout L size [0,0] {}",
-    /Identifier L already declared/,
-  ],
-  [
-    "mismatched binary types",
-    "let x = 1 + true",
-    /Operands do not have the same type/,
-  ],
-  ["mismatched logical types", "let x = true && 1", /Expected a boolean/],
-  ["unary type mismatch", "let x = -true", /Expected a number/],
-  ["unary logical mismatch", "let x = !1", /Expected a boolean/],
-  ["call non-existent function", "f()", /Identifier f not declared/],
-  [
-    "redeclared param",
-    "component C(x: number, x: number) {}",
+    "redeclaring variables",
+    "let x = 1; let x = 2;",
     /Identifier x already declared/,
   ],
+  [
+    "assigning to constants",
+    "const x = 1; x = 2;",
+    /Cannot assign to a constant/,
+  ],
+  [
+    "assigning wrong types",
+    'let x = 1; x = "hello";',
+    /Cannot assign a string to a int/,
+  ],
+  ["non-boolean if test", "if (1) { }", /Expected a boolean/],
+  ["non-numeric repeat count", 'repeat "5" { }', /Expected a number/],
+  [
+    "binary operator type mismatch",
+    "let x = 1 + true;",
+    /Operands do not have the same type/,
+  ],
+  ["unary operator type mismatch", "let x = -true;", /Expected a number/],
+  ["out of loop break", "break;", /Break can only appear in a loop/],
 ];
 
-describe("The analyzer", () => {
+describe("The Analyzer", () => {
   for (const [scenario, source] of semanticChecks) {
-    it(`recognizes ${scenario}`, () => {
-      assert.ok(analyze(parse(source)));
+    it(`correctly analyzes: ${scenario}`, () => {
+      assert.doesNotThrow(() => analyze(parse(source)));
     });
   }
-  for (const [scenario, source, errorMessagePattern] of semanticErrors) {
-    it(`throws on ${scenario}`, () => {
-      assert.throws(() => analyze(parse(source)), errorMessagePattern);
+  for (const [scenario, source, errorMessage] of semanticErrors) {
+    it(`throws on: ${scenario}`, () => {
+      assert.throws(() => analyze(parse(source)), errorMessage);
     });
   }
 });

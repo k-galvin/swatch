@@ -5,19 +5,19 @@ export default function optimize(node) {
 
   switch (node.kind) {
     case "Program":
-      node.layouts = node.layouts.map(optimize);
+      node.statements = node.statements
+        .flatMap(optimize)
+        .filter((s) => s !== null);
       break;
     case "VariableDeclaration":
       node.initializer = optimize(node.initializer);
-      break;
+      return node;
     case "Layout":
       node.size = node.size.map(optimize);
       node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
-    case "ComponentDeclaration":
-      node.component.body = node.component.body
-        .flatMap(optimize)
-        .filter((s) => s !== null);
+    case "Component":
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "Wall":
       node.from = node.from.map(optimize);
@@ -35,26 +35,32 @@ export default function optimize(node) {
       break;
     case "IfStatement":
       node.test = optimize(node.test);
+      if (node.test.kind === "BooleanLiteral") {
+        return node.test.value
+          ? node.consequent.flatMap(optimize)
+          : node.alternate.flatMap(optimize);
+      }
       node.consequent = node.consequent
         .flatMap(optimize)
         .filter((s) => s !== null);
-      node.alternate = (
-        Array.isArray(node.alternate) ? node.alternate : [node.alternate]
-      )
+      node.alternate = node.alternate
         .flatMap(optimize)
         .filter((s) => s !== null);
-      if (node.test === true) return node.consequent;
-      if (node.test === false) return node.alternate;
       break;
     case "RepeatStatement":
       node.count = optimize(node.count);
-      if (node.count === 0n || node.count === 0) return null;
+      if (node.count.kind === "IntLiteral" && node.count.value === 0n)
+        return null;
       node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "ForRangeStatement":
       node.low = optimize(node.low);
       node.high = optimize(node.high);
-      if (typeof node.low === typeof node.high && node.low === node.high)
+      if (
+        node.low.kind === "IntLiteral" &&
+        node.high.kind === "IntLiteral" &&
+        node.low.value === node.high.value
+      )
         return null;
       node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
@@ -62,80 +68,45 @@ export default function optimize(node) {
       node.test = optimize(node.test);
       node.consequent = optimize(node.consequent);
       node.alternate = optimize(node.alternate);
-      if (node.test === true) return node.consequent;
-      if (node.test === false) return node.alternate;
+      if (node.test.kind === "BooleanLiteral") {
+        return node.test.value ? node.consequent : node.alternate;
+      }
       break;
     case "BinaryExpression":
       node.left = optimize(node.left);
       node.right = optimize(node.right);
-      const [l, r] = [node.left, node.right];
-      if (typeof l === "bigint" && typeof r === "bigint") {
-        if (node.op === "+") return l + r;
-        if (node.op === "-") return l - r;
-        if (node.op === "*") return l * r;
-        if (node.op === "/") return l / r;
-        if (node.op === "%") return l % r;
-        if (node.op === "**") return l ** r;
-        if (node.op === "<") return l < r;
-        if (node.op === "<=") return l <= r;
-        if (node.op === "==") return l === r;
-        if (node.op === "!=") return l !== r;
-        if (node.op === ">=") return l >= r;
-        if (node.op === ">") return l > r;
-      }
-      if (typeof l === "number" && typeof r === "number") {
-        if (node.op === "+") return l + r;
-        if (node.op === "-") return l - r;
-        if (node.op === "*") return l * r;
-        if (node.op === "/") return l / r;
-        if (node.op === "%") return l % r;
-        if (node.op === "**") return l ** r;
-        if (node.op === "<") return l < r;
-        if (node.op === "<=") return l <= r;
-        if (node.op === "==") return l === r;
-        if (node.op === "!=") return l !== r;
-        if (node.op === ">=") return l >= r;
-        if (node.op === ">") return l > r;
-      }
-      if (typeof l === "boolean" && typeof r === "boolean") {
-        if (node.op === "&&") return l && r;
-        if (node.op === "||") return l || r;
-        if (node.op === "==") return l === r;
-        if (node.op === "!=") return l !== r;
-      }
-      if (node.op === "+") {
-        if (l === 0 || l === 0n) return r;
-        if (r === 0 || r === 0n) return l;
-      }
-      if (node.op === "-") {
-        if (r === 0 || r === 0n) return l;
-        if (l === r) return 0n;
-      }
-      if (node.op === "*") {
-        if (l === 0 || l === 0n || r === 0 || r === 0n) return 0n;
-        if (l === 1 || l === 1n) return r;
-        if (r === 1 || r === 1n) return l;
-      }
-      if (node.op === "/") {
-        if (l === 0 || l === 0n) return 0n;
-        if (r === 1 || r === 1n) return l;
-        if (l === r) return 1n;
-      }
-      if (node.op === "**") {
-        if (r === 0 || r === 0n) return 1n;
-        if (r === 1 || r === 1n) return l;
+      if (
+        node.left.kind &&
+        node.left.kind.includes("Literal") &&
+        node.right.kind &&
+        node.right.kind.includes("Literal")
+      ) {
+        const [l, r] = [node.left.value, node.right.value];
+        if (node.op === "+")
+          return typeof l === "string" || typeof r === "string"
+            ? core.stringLiteral(String(l) + String(r))
+            : core.floatLiteral(Number(l) + Number(r));
+        if (node.op === "-") return core.floatLiteral(Number(l) - Number(r));
+        if (node.op === "*") return core.floatLiteral(Number(l) * Number(r));
+        if (node.op === "/") return core.floatLiteral(Number(l) / Number(r));
+        if (node.op === "**")
+          return core.floatLiteral(Math.pow(Number(l), Number(r)));
+        if (node.op === "<") return core.booleanLiteral(l < r);
+        if (node.op === "<=") return core.booleanLiteral(l <= r);
+        if (node.op === "==") return core.booleanLiteral(l === r);
+        if (node.op === "!=") return core.booleanLiteral(l !== r);
+        if (node.op === ">=") return core.booleanLiteral(l >= r);
+        if (node.op === ">") return core.booleanLiteral(l > r);
+        if (node.op === "&&") return core.booleanLiteral(l && r);
+        if (node.op === "||") return core.booleanLiteral(l || r);
       }
       break;
     case "UnaryExpression":
       node.operand = optimize(node.operand);
-      if (
-        typeof node.operand === "bigint" ||
-        typeof node.operand === "number"
-      ) {
-        if (node.op === "-") return -node.operand;
-      }
-      if (typeof node.operand === "boolean") {
-        if (node.op === "!") return !node.operand;
+      if (node.operand.kind && node.operand.kind.includes("Literal")) {
+        const v = node.operand.value;
+        if (node.op === "-") return core.floatLiteral(-Number(v));
+        if (node.op === "!") return core.booleanLiteral(!v);
       }
       break;
     case "Call":

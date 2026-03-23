@@ -1,114 +1,144 @@
 Swatch {
-  Program   = Metadata? Decl+
-  
-  Metadata  = "Designer" stringlit "Date" stringlit
-  
-  Decl      = LayoutDecl
-            | VarDecl
-            | ComponentDecl
-            | Stmt
+  // --- Entry Point ---
+  // A Swatch program begins with an optional Metadata header followed by 
+  // one or more statements that define the room logic.
+  Program     = Metadata? Statement+
 
-  VarDecl   = (let_keyword | const_keyword) id "=" Exp
+  // --- Metadata ---
+  // Global blueprint information: Designer "Name" Date "YYYY-MM-DD"
+  Metadata    = designer stringlit date stringlit
 
-  ComponentDecl = component_keyword id "(" ListOf<Param, ","> ")" Block
-  Param     = id ":" Type
-  
-  LayoutDecl = layout_keyword name size_keyword Point Block
-  
-  Block     = "{" Stmt* "}"
-  
-  Stmt      = WallStmt
-            | PlaceStmt
-            | VarDecl
-            | AssignStmt
-            | IfStmt
-            | LoopStmt
-            | CallStmt
-  
-  WallStmt  = wall_keyword id from_keyword Point to_keyword Point Props?
-  PlaceStmt = place_keyword id at_keyword Point Props?
-  AssignStmt = id "=" Exp
-  IfStmt    = if_keyword "(" Exp ")" Block (else_keyword (Block | IfStmt))?
-  CallStmt  = id "(" ListOf<Exp, ","> ")"
-  
-  LoopStmt  = repeat_keyword Exp Block                               -- repeat
-            | for_keyword id in_keyword Exp ("..." | "..<") Exp Block        -- range
+  // --- Statements ---
+  // The building blocks of the script. This includes architectural definitions,
+  // structural placement, and standard programming logic.
+  Statement   = VarDecl
+              | LayoutDecl
+              | ComponentDecl
+              | WallStmt
+              | PlaceStmt
+              | Exp9 "=" Exp ";"                               --assign
+              | id "(" ListOf<Exp, ","> ")" ";"                --call
+              | if Exp Block (else (Block | Statement))?       --if
+              | repeat Exp Block                               --repeat
+              | for id in Exp ("..." | "..<") Exp Block        --range
+              | break ";"                                      --break
 
-  Point     = "[" Exp "," Exp "]"
+  // --- Structural Declarations ---
+  // Variables allow for reusable design constants (e.g., let wallHeight = 2400;).
+  VarDecl     = (let | const) id (":" Type)? "=" Exp ";"
   
-  Props     = "[" NonemptyListOf<Prop, ","> "]"
-  Prop      = id ":" Exp
-
-  Exp       = Exp1 "?" Exp1 ":" Exp                          -- conditional
-            | Exp1
-  Exp1      = Exp1 "||" Exp2                                 -- or
-            | Exp2
-  Exp2      = Exp2 "&&" Exp3                                 -- and
-            | Exp3
-  Exp3      = Exp3 relop Exp4                                -- compare
-            | Exp4
-  Exp4      = Exp4 addop Exp5                                -- add
-            | Exp5
-  Exp5      = Exp5 mulop Exp6                                -- multiply
-            | Exp6
-  Exp6      = Exp7 "**" Exp6                                 -- power
-            | Exp7
-  Exp7      = prefixop Exp8                                  -- unary
-            | Exp8
-  Exp8      = true_keyword ~mut
-            | false_keyword ~mut
-            | floatlit ~mut
-            | intlit ~mut
-            | hex ~mut
-            | stringlit ~mut
-            | id "(" ListOf<Exp, ","> ")" ~mut               -- call
-            | id                                             -- id
-            | "(" Exp ")" ~mut                               -- parens
-
-  relop     = "<=" | "<" | "==" | "!=" | ">=" | ">"
-  addop     = "+" | "-"
-  mulop     = "*" | "/" | "%"
-  prefixop  = "-" | "!"
-
-  mut       = ~"==" "=" | "++" | "--"
+  // Custom reusable design symbols (e.g., a "Window" or "Table" block).
+  ComponentDecl = component id "(" ListOf<Param, ","> ")" Block
+  Param       = id ":" Type
   
-  Type      = "number" | "string" | "color" | "boolean"
+  // The primary canvas. The Point represents the [width, height] of the SVG.
+  LayoutDecl  = layout (stringlit | id) size Point Block
+  
+  // Scoped containers for grouping design actions.
+  Block       = "{" Statement* "}"
 
+  // --- Blueprint Drawing Commands ---
+  // Generates a line/rect on the SVG: Wall IntWall from [0,0] to [100,0] [thick: 5];
+  WallStmt    = wall id from Point to Point Props? ";"
+  
+  // Places a symbol or component: place Chair at [50, 50] [rotate: 90];
+  PlaceStmt   = place id at Point Props? ";"
+  
+  // Coordinate/Dimension vectors: [x, y]
+  Point       = "[" Exp "," Exp "]"
+  
+  // Styling and attribute overrides (e.g., [color: #333333, opacity: 0.8])
+  Props       = "[" NonemptyListOf<Prop, ","> "]"
+  Prop        = id ":" Exp
+
+  // --- Type System ---
+  // Supports basic types, collections of items, and optional decor.
+  Type        = "[" Type "]"                                   --array
+              | Type "?"                                       --optional
+              | id                                             --id
+
+  // --- Expression Logic (9-Level Precedence Hierarchy) ---
+  // Used for calculating precise placements, offsets, and room scaling.
+  Exp         = Exp1 "?" Exp1 ":" Exp                          --conditional
+              | Exp1
+  Exp1        = Exp1 "||" Exp2                                 --or
+              | Exp2
+  Exp2        = Exp2 "&&" Exp3                                 --and
+              | Exp3
+  Exp3        = Exp3 relop Exp4                                --compare
+              | Exp4
+  Exp4        = Exp4 addop Exp5                                --add
+              | Exp5
+  Exp5        = Exp5 mulop Exp6                                --multiply
+              | Exp6
+  Exp6        = Exp7 "**" Exp6                                 --power
+              | Exp7
+  Exp7        = prefixop Exp8                                  --unary
+              | Exp8
+  Exp8        = ~hexlit "#" Exp9                               --hash
+              | "random" Exp9                                  --random
+              | Exp9
+  Exp9        = true ~mut
+              | false ~mut
+              | floatlit ~mut
+              | intlit ~mut
+              | hexlit ~mut
+              | stringlit ~mut
+              | "[" ListOf<Exp, ","> "]"                       --array
+              | Exp9 "(" ListOf<Exp, ","> ")" ~mut             --call
+              | id                                             --id
+              | "(" Exp ")" ~mut                               --parens
+
+  // --- Lexical Rules ---
+  relop       = "<=" | "<" | "==" | "!=" | ">=" | ">"
+  addop       = "+" | "-"
+  mulop       = "*" | "/" | "%"
+  prefixop    = "-" | "!"
+  mut         = ~"==" "=" | "++" | "--"
+
+  // --- Core Primitive Rules ---
   intlit      = digit+
   floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
   stringlit   = "\"" char* "\""
   char        = ~control ~"\\" ~"\"" any
-              | "\\" ("n" | "t" | "\"" | "\\")               -- escape
+              | "\\" ("n" | "t" | "\"" | "\\")                 --escape
   control     = "\x00".."\x1f" | "\x80".."\x9f"
-  hex         = "#" hexDigit+
-  
-  true_keyword      = "true" ~alnum
-  false_keyword     = "false" ~alnum
-  if_keyword        = "if" ~alnum
-  else_keyword      = "else" ~alnum
-  let_keyword       = "let" ~alnum
-  const_keyword     = "const" ~alnum
-  repeat_keyword    = "repeat" ~alnum
-  for_keyword       = "for" ~alnum
-  in_keyword        = "in" ~alnum
-  place_keyword     = "place" ~alnum
-  wall_keyword      = "Wall" ~alnum
-  layout_keyword    = "Layout" ~alnum
-  component_keyword = "component" ~alnum
-  from_keyword      = "from" ~alnum
-  to_keyword        = "to" ~alnum
-  at_keyword        = "at" ~alnum
-  size_keyword      = "size" ~alnum
-  
-  keyword   = true_keyword | false_keyword | let_keyword | const_keyword 
-            | repeat_keyword | for_keyword | in_keyword | place_keyword 
-            | wall_keyword | layout_keyword | component_keyword 
-            | from_keyword | to_keyword | at_keyword | size_keyword
-            | if_keyword | else_keyword
-            | "Designer" | "Date"
+  hexlit      = "#" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit --six
+              | "#" hexDigit hexDigit hexDigit                         --three
 
-  id        = ~keyword (letter | "_") (alnum | "_")*
-  name      = stringlit | id
-  
-  space    += "//" (~"\n" any)*                              -- comment
+  // --- Keywords ---
+  // Lowercase definitions with ~idchar lookahead to prevent variable collision.
+  designer    = "Designer"  ~idchar
+  date        = "Date"      ~idchar
+  layout      = "Layout"    ~idchar
+  size        = "size"      ~idchar
+  wall        = "Wall"      ~idchar
+  from        = "from"      ~idchar
+  to          = "to"        ~idchar
+  place       = "place"     ~idchar
+  at          = "at"        ~idchar
+  component   = "component" ~idchar
+  let         = "let"       ~idchar
+  const       = "const"     ~idchar
+  if          = "if"        ~idchar
+  else        = "else"      ~idchar
+  repeat      = "repeat"    ~idchar
+  for         = "for"       ~idchar
+  in          = "in"        ~idchar
+  break       = "break"     ~idchar
+  true        = "true"      ~idchar
+  false       = "false"     ~idchar
+  random      = "random"    ~idchar
+
+  keyword     = designer | date | layout | size | wall | from | to 
+              | place | at | component | let | const | if | else 
+              | repeat | for | in | break | true | false | random
+
+  // --- Character Classes & Whitespace ---
+  // Utilizes Ohm's built-in rules for foundational characters while 
+  // extending whitespace to support single-line comments.
+  id          = ~keyword letter idchar*
+  idchar      = letter | digit | "_"
+  space      += comment
+  comment     = "//" (~"\n" any)*
 }

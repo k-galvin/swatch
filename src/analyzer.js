@@ -1,13 +1,8 @@
 import * as core from "./core.js";
 
 class Context {
-  constructor({
-    parent = null,
-    locals = new Map(),
-    inLoop = false,
-    function: f = null,
-  }) {
-    Object.assign(this, { parent, locals, inLoop, function: f });
+  constructor({ parent = null, locals = new Map(), inLoop = false }) {
+    Object.assign(this, { parent, locals, inLoop });
   }
   add(name, entity) {
     this.locals.set(name, entity);
@@ -36,7 +31,7 @@ export default function analyze(match) {
   }
 
   function mustNotAlreadyBeDeclared(name, at) {
-    must(!context.lookup(name), `Identifier ${name} already declared`, at);
+    must(!context.locals.has(name), `Identifier ${name} already declared`, at);
   }
 
   function mustHaveBeenFound(entity, name, at) {
@@ -44,14 +39,20 @@ export default function analyze(match) {
   }
 
   function equivalent(t1, t2) {
-    return t1 === t2 || (!!t1?.kind && t1.kind === t2?.kind);
+    return (
+      t1 === t2 ||
+      (t1?.kind === t2?.kind &&
+        (t1.kind !== "ArrayType" || equivalent(t1.baseType, t2.baseType)) &&
+        (t1.kind !== "OptionalType" || equivalent(t1.baseType, t2.baseType)))
+    );
   }
 
   function assignable(from, to) {
     return (
       equivalent(from, to) ||
       (from === core.intType && to === core.floatType) ||
-      to === core.anyType
+      to === core.anyType ||
+      (to.kind === "OptionalType" && assignable(from, to.baseType))
     );
   }
 
@@ -74,75 +75,120 @@ export default function analyze(match) {
   }
 
   function mustBeAssignable(e, { toType: type }, at) {
-    const fromStr = e.type.kind.replace("Type", "").toLowerCase();
-    const toStr = type.kind.replace("Type", "").toLowerCase();
     must(
       assignable(e.type, type),
-      `Cannot assign a ${fromStr} to a ${toStr}`,
+      `Cannot assign a ${e.type.description} to a ${type.description}`,
       at,
     );
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
-    Program(metadata, decls) {
-      return core.program(metadata.rep()[0] ?? null, decls.rep());
-    },
-
-    _iter(...children) {
-      return children.map((c) => c.rep());
-    },
-
-    _terminal() {
-      return this.sourceString;
+    Program(metadata, stmts) {
+      return core.program(metadata.rep()[0] ?? null, stmts.rep());
     },
 
     Metadata(_designer, authorNode, _date, dateNode) {
+      _designer.rep();
+      _date.rep();
       return {
-        author: authorNode.rep(),
-        date: dateNode.rep(),
+        author: authorNode.rep().value,
+        date: dateNode.rep().value,
       };
     },
 
-    LayoutDecl(_layout, idNode, _szKey, point, block) {
-      const name = idNode.rep();
-      mustNotAlreadyBeDeclared(name, { at: idNode });
-      const layoutEntity = core.layout(name);
-      context.add(name, layoutEntity);
-
-      context = context.newChildContext({ inLoop: false });
-      const size = point.rep();
-      const body = block.rep();
-      context = context.parent;
-
-      layoutEntity.size = size;
-      layoutEntity.body = body;
-      return layoutEntity;
+    id(_first, _rest) {
+      return this.sourceString;
     },
 
-    VarDecl(modifier, id, _eq, exp) {
+    Statement_assign(idNode, _eq, exp, _semi) {
+      const target = idNode.rep();
+      const source = exp.rep();
+      must(target.mutable, "Cannot assign to a constant", { at: idNode });
+      mustBeAssignable(source, { toType: target.type }, { at: exp });
+      return core.assignment(target, source);
+    },
+
+    Statement_call(idNode, _open, args, _close, _semi) {
+      const name = idNode.rep();
+      const callee = context.lookup(name);
+      mustHaveBeenFound(callee, name, { at: idNode });
+      const parsedArgs = args.asIteration().children.map((a) => a.rep());
+      const type = callee.kind === "Component" ? core.voidType : callee.type;
+      return core.call(callee, parsedArgs, type);
+    },
+
+    Statement_if(_if, test, consequent, _else, alternate) {
+      const t = test.rep();
+      mustHaveBooleanType(t, { at: test });
+      context = context.newChildContext();
+      const c = consequent.rep();
+      context = context.parent;
+      context = context.newChildContext();
+      const alt = alternate.rep()[0] ?? [];
+      const a = Array.isArray(alt) ? alt : [alt];
+      context = context.parent;
+      return core.ifStatement(t, c, a);
+    },
+
+    Statement_repeat(_repeat, exp, block) {
+      const count = exp.rep();
+      mustHaveNumericType(count, { at: exp });
+      context = context.newChildContext({ inLoop: true });
+      const body = block.rep();
+      context = context.parent;
+      return core.repeatStatement(count, body);
+    },
+
+    Statement_range(_for, idNode, _in, low, op, high, block) {
+      const [l, h] = [low.rep(), high.rep()];
+      mustHaveNumericType(l, { at: low });
+      mustHaveNumericType(h, { at: high });
+      const name = idNode.rep();
+      const iterator = core.variable(name, false, core.floatType);
+      context = context.newChildContext({ inLoop: true });
+      context.add(name, iterator);
+      const body = block.rep();
+      context = context.parent;
+      return core.forRangeStatement(iterator, l, op.sourceString, h, body);
+    },
+
+    Statement_break(_break, _semi) {
+      must(context.inLoop, "Break can only appear in a loop", { at: _break });
+      return core.breakStatement;
+    },
+
+    VarDecl(modifier, id, _colon, type, _eq, exp, _semi) {
       const initializer = exp.rep();
+      const specifiedType = type.rep()[0] ?? initializer.type;
+      mustBeAssignable(initializer, { toType: specifiedType }, { at: exp });
       const mutable = modifier.sourceString === "let";
-      const variable = core.variable(
-        id.sourceString,
-        mutable,
-        initializer.type,
-      );
+      const variable = core.variable(id.sourceString, mutable, specifiedType);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
     },
 
-    ComponentDecl(_comp, id, _open, params, _close, block) {
-      const name = id.sourceString;
-      mustNotAlreadyBeDeclared(name, { at: id });
-      const component = core.component(name);
-      context.add(name, component);
+    LayoutDecl(_layout, idNode, _size, point, block) {
+      const name = idNode.sourceString.replace(/"/g, "");
+      const layoutEntity = core.layout(name);
+      context = context.newChildContext({ inLoop: false });
+      const size = point.rep();
+      const body = block.rep();
+      context = context.parent;
+      layoutEntity.size = size;
+      layoutEntity.body = body;
+      return layoutEntity;
+    },
 
+    ComponentDecl(_comp, id, _open, params, _close, block) {
+      const component = core.component(id.sourceString);
+      mustNotAlreadyBeDeclared(id.sourceString, { at: id });
+      context.add(id.sourceString, component);
       context = context.newChildContext({ inLoop: false });
       component.params = params.asIteration().children.map((p) => p.rep());
       component.body = block.rep();
       context = context.parent;
-      return core.componentDeclaration(component);
+      return component;
     },
 
     Param(id, _colon, type) {
@@ -152,17 +198,7 @@ export default function analyze(match) {
       return param;
     },
 
-    Type(t) {
-      const type = context.lookup(t.sourceString);
-      mustHaveBeenFound(type, t.sourceString, { at: t });
-      return type;
-    },
-
-    Block(_open, stmts, _close) {
-      return stmts.children.map((s) => s.rep());
-    },
-
-    WallStmt(_wall, id, _from, p1, _to, p2, props) {
+    WallStmt(_wall, id, _from, p1, _to, p2, props, _semi) {
       return core.wall(
         id.sourceString,
         p1.rep(),
@@ -171,69 +207,35 @@ export default function analyze(match) {
       );
     },
 
-    PlaceStmt(_place, id, _at, p, props) {
+    PlaceStmt(_place, id, _at, p, props, _semi) {
       return core.furniture(id.sourceString, p.rep(), props.rep()[0] ?? {});
     },
 
-    AssignStmt(id, _eq, exp) {
-      const target = context.lookup(id.sourceString);
-      mustHaveBeenFound(target, id.sourceString, { at: id });
-      const source = exp.rep();
-      mustBeAssignable(source, { toType: target.type }, { at: exp });
-      return core.assignment(target, source);
+    Type_array(_open, type, _close) {
+      return core.arrayType(type.rep());
     },
-
-    IfStmt(_if, _open, test, _close, consequent, _else, alternate) {
-      const t = test.rep();
-      mustHaveBooleanType(t, { at: test });
-      return core.ifStatement(t, consequent.rep(), alternate.rep()[0] ?? []);
+    Type_optional(type, _q) {
+      return core.optionalType(type.rep());
     },
-
-    CallStmt(id, _open, args, _close) {
-      const callee = context.lookup(id.sourceString);
-      mustHaveBeenFound(callee, id.sourceString, { at: id });
-      return core.call(
-        callee,
-        args.asIteration().children.map((a) => a.rep()),
-      );
-    },
-
-    LoopStmt_repeat(_repeat, exp, block) {
-      const count = exp.rep();
-      mustHaveNumericType(count, { at: exp });
-      context = context.newChildContext({ inLoop: true });
-      const body = block.rep();
-      context = context.parent;
-      return core.repeatStatement(count, body);
-    },
-
-    LoopStmt_range(_for, id, _in, low, op, high, block) {
-      const [l, h] = [low.rep(), high.rep()];
-      mustHaveNumericType(l, { at: low });
-      mustHaveNumericType(h, { at: high });
-      const iterator = core.variable(id.sourceString, false, core.floatType);
-      context = context.newChildContext({ inLoop: true });
-      context.add(id.sourceString, iterator);
-      const body = block.rep();
-      context = context.parent;
-      return core.forRangeStatement(iterator, l, op.sourceString, h, body);
+    Type_id(id) {
+      const t = context.lookup(id.sourceString);
+      mustHaveBeenFound(t, id.sourceString, { at: id });
+      return t;
     },
 
     Point(_open, e1, _comma, e2, _close) {
       return [e1.rep(), e2.rep()];
     },
-
     Props(_open, list, _close) {
       return Object.fromEntries(
         list.asIteration().children.map((c) => c.rep()),
       );
     },
-
     Prop(id, _colon, exp) {
       return [id.sourceString, exp.rep()];
     },
 
-    Exp_conditional(test, _q, e1, _c, e2) {
+    Exp_conditional(test, _q, e1, _colon, e2) {
       const t = test.rep();
       mustHaveBooleanType(t, { at: test });
       const [v1, v2] = [e1.rep(), e2.rep()];
@@ -258,87 +260,99 @@ export default function analyze(match) {
     Exp3_compare(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.rep(), v1, v2, core.booleanType);
+      return core.binary(op.sourceString, v1, v2, core.booleanType);
     },
 
     Exp4_add(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
-      const opStr = op.rep();
-      if (
-        opStr === "+" &&
-        (equivalent(v1.type, core.stringType) ||
-          equivalent(v2.type, core.stringType))
-      ) {
-        return core.binary(opStr, v1, v2, core.stringType);
+      if (v1.type === core.stringType || v2.type === core.stringType) {
+        return core.binary("+", v1, v2, core.stringType);
       }
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(opStr, v1, v2, v1.type);
+      return core.binary(op.sourceString, v1, v2, v1.type);
     },
+
     Exp5_multiply(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.rep(), v1, v2, v1.type);
+      return core.binary(op.sourceString, v1, v2, v1.type);
     },
 
-    Exp6_power(e1, op, e2) {
+    Exp6_power(e1, _op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
-      mustBothHaveTheSameType(v1, v2, { at: op });
+      mustBothHaveTheSameType(v1, v2, { at: e1 });
       return core.binary("**", v1, v2, v1.type);
     },
+
     Exp7_unary(op, e1) {
       const v = e1.rep();
-      const opStr = op.sourceString;
-      if (opStr === "-") mustHaveNumericType(v, { at: e1 });
-      if (opStr === "!") mustHaveBooleanType(v, { at: e1 });
-      return core.unary(opStr, v, v.type);
+      if (op.sourceString === "-") mustHaveNumericType(v, { at: e1 });
+      if (op.sourceString === "!") mustHaveBooleanType(v, { at: e1 });
+      return core.unary(op.sourceString, v, v.type);
     },
 
-    Exp8_call(id, _open, args, _close) {
-      const callee = context.lookup(id.sourceString);
-      mustHaveBeenFound(callee, id.sourceString, { at: id });
-      return core.call(
-        callee,
-        args.asIteration().children.map((a) => a.rep()),
+    Exp8_hash(_hash, e) {
+      const val = e.rep();
+      return core.unary("#", val, core.intType);
+    },
+
+    Exp8_random(_random, e) {
+      const val = e.rep();
+      return core.unary("random", val, val.type.baseType);
+    },
+
+    Exp9(node) {
+      return node.rep();
+    },
+    Exp9_array(_open, elements, _close) {
+      return core.arrayLiteral(
+        elements.asIteration().children.map((e) => e.rep()),
       );
     },
-
-    Exp8_id(id) {
-      const entity = context.lookup(id.sourceString);
-      mustHaveBeenFound(entity, id.sourceString, { at: id });
+    Exp9_call(calleeNode, _open, args, _close) {
+      const callee = calleeNode.rep();
+      const parsedArgs = args.asIteration().children.map((a) => a.rep());
+      const type = callee.kind === "Component" ? core.voidType : callee.type;
+      return core.call(callee, parsedArgs, type);
+    },
+    Exp9_id(idNode) {
+      const entity = context.lookup(idNode.sourceString);
+      mustHaveBeenFound(entity, idNode.sourceString, { at: idNode });
       return entity;
     },
-
-    Exp8_parens(_open, exp, _close) {
-      return exp.rep();
+    Exp9_parens(_open, e, _close) {
+      return e.rep();
     },
-
-    true_keyword(_) {
-      return true;
+    true(_) {
+      return core.booleanLiteral(true);
     },
-    false_keyword(_) {
-      return false;
+    false(_) {
+      return core.booleanLiteral(false);
     },
     intlit(_) {
-      return BigInt(this.sourceString);
+      return core.intLiteral(BigInt(this.sourceString));
     },
-    floatlit(_whole, _point, _fraction, _e, _sign, _exponent) {
-      return parseFloat(this.sourceString);
+    floatlit(_w, _d, _f, _e, _s, _ex) {
+      return core.floatLiteral(parseFloat(this.sourceString));
     },
-    stringlit(_open, _chars, _close) {
-      return this.sourceString.slice(1, -1);
+    hexlit(_) {
+      return core.colorLiteral(this.sourceString);
     },
-    hex(_hash, _digits) {
-      return this.sourceString;
+    stringlit(_open, chars, _close) {
+      return core.stringLiteral(chars.sourceString);
     },
 
-    id(_first, _rest) {
+    _iter(...children) {
+      return children.map((c) => c.rep());
+    },
+    _terminal() {
       return this.sourceString;
     },
-    name(n) {
-      return n.rep();
+    Block(_open, stmts, _close) {
+      return stmts.children.map((s) => s.rep());
     },
   });
 

@@ -1,341 +1,300 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import optimize from "../src/optimizer.js";
+import * as core from "../src/core.js";
 
-const binary = (op, left, right) => ({
-  kind: "BinaryExpression",
-  op,
-  left,
-  right,
-});
-const unary = (op, operand) => ({ kind: "UnaryExpression", op, operand });
+// Helper to create AST nodes for testing
+const binary = (op, left, right) => core.binary(op, left, right, core.anyType);
+const unary = (op, operand) => core.unary(op, operand, core.anyType);
 
 describe("The Optimizer", () => {
   it("folds constant arithmetic", () => {
-    assert.equal(optimize(binary("+", 5n, 8n)), 13n);
-    assert.equal(optimize(binary("-", 5n, 8n)), -3n);
-    assert.equal(optimize(binary("*", 5n, 8n)), 40n);
-    assert.equal(optimize(binary("/", 40n, 8n)), 5n);
-    assert.equal(optimize(binary("%", 43n, 10n)), 3n);
-    assert.equal(optimize(binary("**", 2n, 3n)), 8n);
-    // Floats
-    assert.equal(optimize(binary("+", 5.0, 8.0)), 13.0);
-    assert.equal(optimize(binary("-", 5.0, 8.0)), -3.0);
-    assert.equal(optimize(binary("*", 5.0, 8.0)), 40.0);
-    assert.equal(optimize(binary("/", 40.0, 8.0)), 5.0);
-    assert.equal(optimize(binary("%", 43.0, 10.0)), 3.0);
-    assert.equal(optimize(binary("**", 2.0, 3.0)), 8.0);
+    // We expect the optimizer to return a core Literal object
+    assert.deepEqual(
+      optimize(binary("+", core.intLiteral(5n), core.intLiteral(8n))),
+      core.floatLiteral(13),
+    );
+    assert.deepEqual(
+      optimize(binary("-", core.intLiteral(5n), core.intLiteral(8n))),
+      core.floatLiteral(-3),
+    );
+    assert.deepEqual(
+      optimize(binary("*", core.intLiteral(5n), core.intLiteral(8n))),
+      core.floatLiteral(40),
+    );
+    assert.deepEqual(
+      optimize(binary("/", core.intLiteral(40n), core.intLiteral(8n))),
+      core.floatLiteral(5),
+    );
+    assert.deepEqual(
+      optimize(binary("**", core.intLiteral(2n), core.intLiteral(3n))),
+      core.floatLiteral(8),
+    );
   });
 
   it("folds constant comparisons", () => {
-    assert.equal(optimize(binary("<", 5n, 8n)), true);
-    assert.equal(optimize(binary("<=", 5n, 5n)), true);
-    assert.equal(optimize(binary("==", 5n, 5n)), true);
-    assert.equal(optimize(binary("!=", 5n, 5n)), false);
-    assert.equal(optimize(binary(">=", 8n, 5n)), true);
-    assert.equal(optimize(binary(">", 8n, 5n)), true);
-    // Floats
-    assert.equal(optimize(binary("<", 5.0, 8.0)), true);
-    assert.equal(optimize(binary("<=", 5.0, 5.0)), true);
-    assert.equal(optimize(binary("==", 5.0, 5.0)), true);
-    assert.equal(optimize(binary("!=", 5.0, 5.0)), false);
-    assert.equal(optimize(binary(">=", 8.0, 5.0)), true);
-    assert.equal(optimize(binary(">", 8.0, 5.0)), true);
-    // Mixed types (should not fold)
-    const mixed = binary("<", 5, 8n);
-    assert.deepEqual(optimize(mixed), mixed);
-    const mixed2 = binary("<", 5n, 8.0);
-    assert.deepEqual(optimize(mixed2), mixed2);
+    assert.deepEqual(
+      optimize(binary("<", core.intLiteral(5n), core.intLiteral(8n))),
+      core.booleanLiteral(true),
+    );
+    assert.deepEqual(
+      optimize(binary("<=", core.intLiteral(5n), core.intLiteral(5n))),
+      core.booleanLiteral(true),
+    );
+    assert.deepEqual(
+      optimize(binary("==", core.intLiteral(5n), core.intLiteral(5n))),
+      core.booleanLiteral(true),
+    );
+    assert.deepEqual(
+      optimize(binary("!=", core.intLiteral(5n), core.intLiteral(5n))),
+      core.booleanLiteral(false),
+    );
+    assert.deepEqual(
+      optimize(binary(">=", core.intLiteral(5n), core.intLiteral(5n))),
+      core.booleanLiteral(true),
+    );
+    assert.deepEqual(
+      optimize(binary(">", core.intLiteral(5n), core.intLiteral(8n))),
+      core.booleanLiteral(false),
+    );
   });
 
-  it("folds constant logical ops", () => {
-    assert.equal(optimize(binary("&&", true, false)), false);
-    assert.equal(optimize(binary("&&", true, true)), true);
-    assert.equal(optimize(binary("||", true, false)), true);
-    assert.equal(optimize(binary("||", false, true)), true);
-    assert.equal(optimize(binary("||", false, false)), false);
-    assert.equal(optimize(binary("==", true, true)), true);
-    assert.equal(optimize(binary("==", true, false)), false);
-    assert.equal(optimize(binary("!=", true, true)), false);
-    assert.equal(optimize(binary("!=", true, false)), true);
-  });
-
-  it("handles unoptimizable boolean binary expressions", () => {
-    const e = binary("<", true, false);
-    assert.deepEqual(optimize(e), e);
+  it("folds all constant logical ops", () => {
+    assert.deepEqual(
+      optimize(
+        binary("&&", core.booleanLiteral(true), core.booleanLiteral(false)),
+      ),
+      core.booleanLiteral(false),
+    );
+    assert.deepEqual(
+      optimize(
+        binary("||", core.booleanLiteral(false), core.booleanLiteral(false)),
+      ),
+      core.booleanLiteral(false),
+    );
+    assert.deepEqual(
+      optimize(
+        binary("||", core.booleanLiteral(true), core.booleanLiteral(false)),
+      ),
+      core.booleanLiteral(true),
+    );
   });
 
   it("folds constant unary ops", () => {
-    assert.equal(optimize(unary("-", 5n)), -5n);
-    assert.equal(optimize(unary("-", 5.0)), -5.0);
-    assert.equal(optimize(unary("!", true)), false);
-    const u = unary("-", "x");
-    assert.deepEqual(optimize(u), u);
-    const b = unary("!", "x");
-    assert.deepEqual(optimize(b), b);
-    const pos = unary("+", 5n);
-    assert.deepEqual(optimize(pos), pos);
-    const complex = unary("-", { kind: "Unknown" });
-    assert.deepEqual(optimize(complex), complex);
+    assert.deepEqual(
+      optimize(unary("-", core.intLiteral(5n))),
+      core.floatLiteral(-5),
+    );
+    assert.deepEqual(
+      optimize(unary("!", core.booleanLiteral(true))),
+      core.booleanLiteral(false),
+    );
   });
 
-  it("performs strength reduction", () => {
-    assert.equal(optimize(binary("+", "x", 0n)), "x");
-    assert.equal(optimize(binary("+", 0n, "x")), "x");
-    assert.equal(optimize(binary("+", "x", 0)), "x");
-    assert.equal(optimize(binary("+", 0, "x")), "x");
-
-    assert.equal(optimize(binary("-", "x", 0n)), "x");
-    assert.equal(optimize(binary("-", "x", 0)), "x");
-    assert.equal(optimize(binary("-", "x", "x")), 0n);
-
-    assert.equal(optimize(binary("*", "x", 1n)), "x");
-    assert.equal(optimize(binary("*", 1n, "x")), "x");
-    assert.equal(optimize(binary("*", "x", 1)), "x");
-    assert.equal(optimize(binary("*", 1, "x")), "x");
-    assert.equal(optimize(binary("*", "x", 0n)), 0n);
-    assert.equal(optimize(binary("*", 0n, "x")), 0n);
-    assert.equal(optimize(binary("*", "x", 0)), 0n);
-    assert.equal(optimize(binary("*", 0, "x")), 0n);
-
-    assert.equal(optimize(binary("/", "x", 1n)), "x");
-    assert.deepEqual(optimize(binary("/", 1n, "x")), binary("/", 1n, "x"));
-    assert.equal(optimize(binary("/", "x", 1)), "x");
-    assert.equal(optimize(binary("/", 0n, "x")), 0n);
-    assert.equal(optimize(binary("/", 0, "x")), 0n);
-    assert.equal(optimize(binary("/", "x", "x")), 1n);
-
-    assert.equal(optimize(binary("**", "x", 0n)), 1n);
-    assert.equal(optimize(binary("**", "x", 0)), 1n);
-    assert.equal(optimize(binary("**", "x", 1n)), "x");
-    assert.equal(optimize(binary("**", "x", 1)), "x");
+  it("folds constant string concatenation", () => {
+    assert.deepEqual(
+      optimize(binary("+", core.stringLiteral("a"), core.stringLiteral("b"))),
+      core.stringLiteral("ab"),
+    );
+    assert.deepEqual(
+      optimize(binary("+", core.intLiteral(1n), core.stringLiteral("a"))),
+      core.stringLiteral("1a"),
+    );
   });
 
-  it("optimizes Program", () => {
-    const program = {
-      kind: "Program",
-      layouts: [{ kind: "Layout", name: "L", size: [100n, 100n], body: [] }],
-    };
-    assert.deepEqual(optimize(program), program);
-  });
-
-  it("optimizes VariableDeclaration", () => {
-    const decl = {
-      kind: "VariableDeclaration",
-      initializer: binary("+", 1n, 1n),
-    };
-    const optimized = optimize(decl);
-    assert.equal(optimized.initializer, 2n);
-  });
-
-  it("optimizes Layout", () => {
-    const layout = {
-      kind: "Layout",
-      name: "L",
-      size: [binary("+", 50n, 50n), 100n],
-      body: [
-        { kind: "Assignment", target: "x", source: "x" },
-        {
-          kind: "IfStatement",
-          test: false,
-          consequent: [{ kind: "Wall", name: "W", from: [0, 0], to: [1, 1] }],
-          alternate: [{ kind: "Wall", name: "W", from: [0, 0], to: [2, 2] }],
-        },
-        {
-          kind: "IfStatement",
-          test: true,
-          consequent: [
-            { kind: "Wall", name: "W_TRUE", from: [0, 0], to: [3, 3] },
-          ],
-          alternate: [],
-        },
-      ],
-    };
-    const optimized = optimize(layout);
-    assert.equal(optimized.size[0], 100n);
-    // x = x is gone, if(false) is replaced by alternate, if(true) is replaced by consequent
-    assert.equal(optimized.body.length, 2);
-    assert.equal(optimized.body[0].kind, "Wall");
-    assert.equal(optimized.body[1].name, "W_TRUE");
-  });
-
-  it("optimizes ComponentDeclaration", () => {
-    const compDecl = {
-      kind: "ComponentDeclaration",
-      component: {
-        kind: "Component",
-        body: [{ kind: "Assignment", target: "x", source: "x" }],
-      },
-    };
-    const optimized = optimize(compDecl);
-    assert.equal(optimized.component.body.length, 0);
-  });
-
-  it("optimizes Wall and Furniture", () => {
-    const wall = {
-      kind: "Wall",
-      from: [binary("+", 0n, 0n), 0n],
-      to: [10n, 10n],
-      props: { thickness: binary("*", 2n, 2n) },
-    };
-    const optimizedWall = optimize(wall);
-    assert.equal(optimizedWall.from[0], 0n);
-    assert.equal(optimizedWall.props.thickness, 4n);
-
-    const furniture = {
-      kind: "Furniture",
-      at: [binary("+", 5n, 5n), 5n],
-      props: { color: "red" },
-    };
-    const optimizedFurniture = optimize(furniture);
-    assert.equal(optimizedFurniture.at[0], 10n);
-  });
-
-  it("optimizes Call", () => {
-    const call = { kind: "Call", args: [binary("+", 1n, 1n), "y"] };
-    const optimized = optimize(call);
-    assert.equal(optimized.args[0], 2n);
-    assert.equal(optimized.args[1], "y");
-  });
-
-  it("handles unoptimizable assignments", () => {
-    const assign = { kind: "Assignment", target: "x", source: 1n };
-    assert.deepEqual(optimize(assign), assign);
-    const selfAssign = { kind: "Assignment", target: "x", source: "x" };
-    assert.equal(optimize(selfAssign), null);
-  });
-
-  it("handles unoptimizable binary expressions", () => {
-    const e = binary("%", "x", "y");
-    assert.deepEqual(optimize(e), e);
-  });
-
-  it("eliminates dead code in conditionals", () => {
-    const condTrue = {
-      kind: "Conditional",
-      test: true,
-      consequent: "yes",
-      alternate: "no",
-    };
-    assert.equal(optimize(condTrue), "yes");
-    const condFalse = {
-      kind: "Conditional",
-      test: false,
-      consequent: "yes",
-      alternate: "no",
-    };
-    assert.equal(optimize(condFalse), "no");
-    const condUnknown = {
-      kind: "Conditional",
-      test: "x",
-      consequent: "yes",
-      alternate: "no",
-    };
-    assert.deepEqual(optimize(condUnknown), condUnknown);
-
-    const ifTrue = {
-      kind: "IfStatement",
-      test: true,
-      consequent: [
-        { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
-      ],
-      alternate: [],
-    };
-    assert.deepEqual(optimize(ifTrue), [
-      { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
+  it("optimizes Program and Statements", () => {
+    const program = core.program(null, [
+      core.variableDeclaration(
+        core.variable("x", true, core.intType),
+        binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+      ),
     ]);
-    const ifFalse = {
-      kind: "IfStatement",
-      test: false,
-      consequent: [],
-      alternate: [
-        { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
+    const optimized = optimize(program);
+    assert.strictEqual(
+      optimized.statements[0].initializer.kind,
+      "FloatLiteral",
+    );
+    assert.strictEqual(optimized.statements[0].initializer.value, 2);
+  });
+
+  it("eliminates dead code in IfStatements", () => {
+    const stmt = core.ifStatement(
+      core.booleanLiteral(true),
+      [core.wall("W1", [0, 0], [10, 10], {})],
+      [core.wall("W2", [0, 0], [20, 20], {})],
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.length, 1);
+    assert.strictEqual(optimized[0].name, "W1");
+
+    const stmt2 = core.ifStatement(
+      core.booleanLiteral(false),
+      [core.wall("W1", [0, 0], [1, 1], {})],
+      [core.wall("W2", [0, 0], [2, 2], {})],
+    );
+    const optimized2 = optimize(stmt2);
+    assert.strictEqual(optimized2.length, 1);
+    assert.strictEqual(optimized2[0].name, "W2");
+  });
+
+  it("optimizes non-constant if-statement branches", () => {
+    const stmt = core.ifStatement(
+      core.variable("test", false, core.booleanType),
+      [
+        core.assignment(
+          core.variable("x", true, core.intType),
+          binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+        ),
       ],
-    };
-    assert.deepEqual(optimize(ifFalse), [
-      { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
-    ]);
-
-    const ifFalseSingle = {
-      kind: "IfStatement",
-      test: false,
-      consequent: [],
-      alternate: {
-        kind: "Wall",
-        name: "W",
-        from: [0, 0],
-        to: [2, 2],
-        props: {},
-      },
-    };
-    assert.deepEqual(optimize(ifFalseSingle), [
-      { kind: "Wall", name: "W", from: [0, 0], to: [2, 2], props: {} },
-    ]);
-
-    const ifUnknown = {
-      kind: "IfStatement",
-      test: "x",
-      consequent: [
-        { kind: "Wall", name: "W", from: [0, 0], to: [1, 1], props: {} },
+      [
+        core.assignment(
+          core.variable("y", true, core.intType),
+          binary("+", core.intLiteral(2n), core.intLiteral(2n)),
+        ),
       ],
-      alternate: [],
-    };
-    const optimizedIf = optimize(ifUnknown);
-    assert.strictEqual(optimizedIf.kind, "IfStatement");
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.consequent[0].source.value, 2);
+    assert.strictEqual(optimized.alternate[0].source.value, 4);
   });
 
-  it("eliminates dead loops", () => {
-    const repeatZeroInt = { kind: "RepeatStatement", count: 0n, body: [] };
-    assert.equal(optimize(repeatZeroInt), null);
-    const repeatZeroFloat = { kind: "RepeatStatement", count: 0, body: [] };
-    assert.equal(optimize(repeatZeroFloat), null);
-    const repeatFive = {
-      kind: "RepeatStatement",
-      count: 5n,
-      body: [{ kind: "Assignment", target: "x", source: "x" }],
-    };
-    assert.equal(optimize(repeatFive).body.length, 0);
-
-    const rangeEmpty = {
-      kind: "ForRangeStatement",
-      low: 5n,
-      high: 5n,
-      body: [],
-    };
-    assert.equal(optimize(rangeEmpty), null);
-    const rangeEmptyFloat = {
-      kind: "ForRangeStatement",
-      low: 5.0,
-      high: 5.0,
-      body: [],
-    };
-    assert.equal(optimize(rangeEmptyFloat), null);
-    const rangeMismatched = {
-      kind: "ForRangeStatement",
-      low: 5n,
-      high: 5,
-      body: [],
-    };
-    assert.ok(optimize(rangeMismatched));
-    const rangeFull = {
-      kind: "ForRangeStatement",
-      low: 0n,
-      high: 10n,
-      body: [{ kind: "Assignment", target: "x", source: "x" }],
-    };
-    assert.equal(optimize(rangeFull).body.length, 0);
+  it("eliminates dead RepeatStatements", () => {
+    const stmt = core.repeatStatement(core.intLiteral(0n), [
+      core.wall("W", [0, 0], [1, 1], {}),
+    ]);
+    assert.strictEqual(optimize(stmt), null);
   });
 
-  it("handles null and primitives", () => {
-    assert.equal(optimize(null), null);
-    assert.equal(optimize(undefined), undefined);
-    assert.equal(optimize(5n), 5n);
-    assert.equal(optimize(true), true);
-    assert.deepEqual(optimize({ a: 1 }), { a: 1 });
+  it("optimizes Swatch-specific nodes (Wall/Furniture)", () => {
+    const w = core.wall(
+      "W",
+      [
+        binary("+", core.intLiteral(0n), core.intLiteral(0n)),
+        core.intLiteral(0n),
+      ],
+      [core.intLiteral(10n), core.intLiteral(10n)],
+      { thickness: binary("*", core.intLiteral(2n), core.intLiteral(2n)) },
+    );
+    const optimizedW = optimize(w);
+    assert.strictEqual(optimizedW.from[0].kind, "FloatLiteral");
+    assert.strictEqual(optimizedW.props.thickness.value, 4);
+
+    const f = core.furniture("Chair", [0, 0], {
+      rotate: binary("+", core.intLiteral(45n), core.intLiteral(45n)),
+    });
+    const optimizedF = optimize(f);
+    assert.strictEqual(optimizedF.props.rotate.value, 90);
   });
 
-  it("returns the node if kind is unknown", () => {
-    const unknown = { kind: "Unknown" };
-    assert.deepEqual(optimize(unknown), unknown);
+  it("eliminates self-assignments", () => {
+    const x = core.variable("x", true, core.intType);
+    const stmt = core.assignment(x, x);
+    assert.strictEqual(optimize(stmt), null);
+  });
+
+  it("handles unoptimizable expressions", () => {
+    const expr = binary(
+      "+",
+      core.variable("x", true, core.intType),
+      core.intLiteral(1n),
+    );
+    assert.deepEqual(optimize(expr), expr);
+  });
+
+  it("folds constant ternary operators", () => {
+    const cond1 = core.conditional(
+      core.booleanLiteral(true),
+      core.intLiteral(1n),
+      core.intLiteral(2n),
+      core.intType,
+    );
+    assert.deepEqual(optimize(cond1), core.intLiteral(1n));
+
+    const cond2 = core.conditional(
+      core.booleanLiteral(false),
+      core.intLiteral(1n),
+      core.intLiteral(2n),
+      core.intType,
+    );
+    assert.deepEqual(optimize(cond2), core.intLiteral(2n));
+  });
+
+  it("optimizes call arguments", () => {
+    const c = core.call(core.variable("f", false, core.anyType), [
+      binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+    ]);
+    const optimized = optimize(c);
+    assert.strictEqual(optimized.args[0].kind, "FloatLiteral");
+  });
+
+  it("optimizes component bodies", () => {
+    const c = core.component("C", [], [
+      core.assignment(
+        core.variable("x", true, core.intType),
+        binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+      ),
+    ]);
+    const optimized = optimize(c);
+    assert.strictEqual(optimized.body[0].source.value, 2);
+  });
+
+  it("optimizes RepeatStatement body", () => {
+    const stmt = core.repeatStatement(core.intLiteral(1n), [
+      core.assignment(
+        core.variable("x", true, core.intType),
+        binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+      ),
+    ]);
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.body[0].source.kind, "FloatLiteral");
+  });
+
+  it("optimizes ForRangeStatement low/high", () => {
+    const stmt = core.forRangeStatement(
+      core.variable("i", false, core.floatType),
+      binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+      "...",
+      binary("+", core.intLiteral(2n), core.intLiteral(2n)),
+      [],
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.low.value, 2);
+    assert.strictEqual(optimized.high.value, 4);
+  });
+
+  it("eliminates empty for-range loops (low == high)", () => {
+    const stmt1 = core.forRangeStatement(
+      core.variable("i", false, core.floatType),
+      core.intLiteral(1n),
+      "...",
+      core.intLiteral(1n),
+      [],
+    );
+    assert.strictEqual(optimize(stmt1), null);
+
+    const stmt2 = core.forRangeStatement(
+      core.variable("i", false, core.floatType),
+      core.floatLiteral(1.0),
+      "...",
+      core.intLiteral(2n),
+      [],
+    );
+    const optimized2 = optimize(stmt2);
+    assert.strictEqual(optimized2.low.value, 1.0);
+  });
+
+  it("handles unoptimizable unary expressions", () => {
+    const expr = unary("-", core.variable("x", false, core.floatType));
+    assert.deepEqual(optimize(expr), expr);
+  });
+
+  it("handles unoptimizable ternary", () => {
+    const cond = core.conditional(
+      core.variable("x", false, core.booleanType),
+      core.intLiteral(1n),
+      core.intLiteral(2n),
+      core.intType,
+    );
+    assert.deepEqual(optimize(cond), cond);
   });
 });

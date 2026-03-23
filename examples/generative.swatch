@@ -1,19 +1,19 @@
 Designer "Artist" Date "2026-03-18"
 
 Layout "Pattern" size [600, 600] {
-  let count = 0
+  let count = 0;
   repeat 5 {
-    count = count + 1
+    count = count + 1;
     // Shifted down and right to avoid clipping
-    place Dot at [count * 80, 80] [color: #ff0000]
+    place Dot at [count * 80, 80] [color: #ff0000];
   }
 
-  for i in 0...4 {
-    for j in 0...4 {
-      let x = 100 + i * 100
-      let y = 150 + j * 100
-      let isEven = (i + j) % 2 == 0
-      place Node at [x, y] [color: isEven ? #000000 : #aaaaaa]
+  for i in 0 ... 4 {
+    for j in 0 ... 4 {
+      let x = 100.0 + i * 100.0;
+      let y = 150.0 + j * 100.0;
+      let isEven = (i + j) % 2 == 0;
+      place Node at [x, y] [color: isEven ? #000000 : #aaaaaa];
     }
   }
 }

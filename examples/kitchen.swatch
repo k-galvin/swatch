@@ -1,27 +1,27 @@
 Designer "Chef de Cuisine" Date "2026-03-18"
 
-const ACCENT = #e74c3c
-const WOOD = #7e5233
+const ACCENT = #e74c3c;
+const WOOD = #7e5233;
 
-component Cabinet(x: number, y: number) {
-  place Unit at [x, y] [color: WOOD]
+component Cabinet(x: float, y: float) {
+  place Unit at [x, y] [color: WOOD];
 }
 
 Layout "Professional Kitchen" size [800, 800] {
   // Perimeter Walls with more space
-  Wall NorthWall from [50, 50] to [750, 50] [color: ACCENT, thickness: 15]
-  Wall WestWall from [50, 50] to [50, 750] [color: ACCENT, thickness: 10]
+  Wall NorthWall from [50, 50] to [750, 50] [color: ACCENT, thickness: 15];
+  Wall WestWall from [50, 50] to [50, 750] [color: ACCENT, thickness: 10];
   
   // Spread out cabinets
-  for i in 0...4 {
-    Cabinet(150 + i * 150, 100)
+  for i in 0 ... 4 {
+    Cabinet(150.0 + i * 150.0, 100.0);
   }
 
   // Island with integrated sink
-  Wall Island from [300, 400] to [500, 400] [color: #34495e, thickness: 40]
-  place Sink at [400, 400] [color: #3498db]
+  Wall Island from [300, 400] to [500, 400] [color: #34495e, thickness: 40];
+  place Sink at [400, 400] [color: #3498db];
 
   // Balanced appliance placement
-  place Range at [150, 100] [color: #c0392b]
-  place Fridge at [100, 600] [color: #ecf0f1]
+  place Range at [150, 100] [color: #c0392b];
+  place Fridge at [100, 600] [color: #ecf0f1];
 }

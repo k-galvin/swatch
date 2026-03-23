@@ -1,33 +1,33 @@
 Designer "Kate" Date "2026-03-18"
 
-const STEEL = #7f8c8d
-const FABRIC = #2980b9
+const STEEL = #7f8c8d;
+const FABRIC = #2980b9;
 
-component ModularSofa(x: number, y: number, pieces: number) {
-  for p in 0..<pieces {
-    place Section at [x + p * 50, y] [color: FABRIC]
+component ModularSofa(x: float, y: float, pieces: float) {
+  for p in 0 ..< pieces {
+    place Section at [x + p * 50.0, y] [color: FABRIC];
   }
 }
 
 Layout "Modern Studio" size [800, 600] {
   // Perimeter Shell
-  Wall North from [50, 50] to [750, 50] [thickness: 12]
-  Wall East from [750, 50] to [750, 550] [thickness: 12]
-  Wall South from [50, 550] to [750, 550] [thickness: 12]
-  Wall West from [50, 50] to [50, 550] [thickness: 12]
+  Wall North from [50, 50] to [750, 50] [thickness: 12];
+  Wall East from [750, 50] to [750, 550] [thickness: 12];
+  Wall South from [50, 550] to [750, 550] [thickness: 12];
+  Wall West from [50, 50] to [50, 550] [thickness: 12];
 
   // Sleeping Zone
-  place KingBed at [150, 150] [color: #f1c40f]
-  Wall Screen from [280, 50] to [280, 250] [color: STEEL, thickness: 5]
+  place KingBed at [150, 150] [color: #f1c40f];
+  Wall Screen from [280, 50] to [280, 250] [color: STEEL, thickness: 5];
 
   // Work Area
-  place L_Desk at [650, 150] [color: STEEL]
-  place ProChair at [600, 150] [color: #2c3e50]
+  place L_Desk at [650, 150] [color: STEEL];
+  place ProChair at [600, 150] [color: #2c3e50];
 
   // Generative Seating
-  ModularSofa(300, 400, 3)
+  ModularSofa(300.0, 400.0, 3.0);
   
   // Media Unit (well within the new 600 height)
-  Wall MediaBench from [300, 520] to [500, 520] [color: #333, thickness: 15]
-  place TV at [400, 520] [color: #000, screenSize: 55]
+  Wall MediaBench from [300, 520] to [500, 520] [color: #333333, thickness: 15];
+  place TV at [400, 520] [color: #000000, screenSize: 55];
 }
