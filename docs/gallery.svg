@@ -1,0 +1,29 @@
+<svg id="Main Gallery_1" width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  
+  <text x="10" y="20" font-family="Arial" font-size="12" fill="#999">Designer: Curator | Date: 2026-03-18</text>
+  <rect width="100%" height="100%" fill="#fcfcfc" />
+  <line x1="400" y1="200" x2="400" y2="600" stroke="#e74c3c" stroke-width="12" stroke-linecap="round" />
+  <line x1="800" y1="200" x2="800" y2="600" stroke="#e74c3c" stroke-width="12" stroke-linecap="round" />
+  <rect x="185" y="135" width="30" height="30" fill="#ecf0f1" rx="4" />
+  <text x="200" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Pedestal</text>
+  <rect x="185" y="135" width="30" height="30" fill="#95a5a6" rx="4" />
+  <text x="200" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Exhibit 1</text>
+  <rect x="385" y="135" width="30" height="30" fill="#ecf0f1" rx="4" />
+  <text x="400" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Pedestal</text>
+  <rect x="385" y="135" width="30" height="30" fill="#95a5a6" rx="4" />
+  <text x="400" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Exhibit 2</text>
+  <rect x="585" y="135" width="30" height="30" fill="#ecf0f1" rx="4" />
+  <text x="600" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Pedestal</text>
+  <rect x="585" y="135" width="30" height="30" fill="#95a5a6" rx="4" />
+  <text x="600" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Exhibit 3</text>
+  <rect x="785" y="135" width="30" height="30" fill="#ecf0f1" rx="4" />
+  <text x="800" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Pedestal</text>
+  <rect x="785" y="135" width="30" height="30" fill="#95a5a6" rx="4" />
+  <text x="800" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Exhibit 4</text>
+  <rect x="985" y="135" width="30" height="30" fill="#ecf0f1" rx="4" />
+  <text x="1000" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Pedestal</text>
+  <rect x="985" y="135" width="30" height="30" fill="#95a5a6" rx="4" />
+  <text x="1000" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Exhibit 5</text>
+  <rect x="585" y="385" width="30" height="30" fill="#3498db" rx="4" />
+  <text x="600" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Fountain</text>
+</svg>

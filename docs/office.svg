@@ -1,0 +1,21 @@
+<svg id="Office_1" width="1000" height="800" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+  
+  <text x="10" y="20" font-family="Arial" font-size="12" fill="#999">Designer: Manager | Date: 2026-03-18</text>
+  <rect width="100%" height="100%" fill="#fcfcfc" />
+  <line x1="50" y1="50" x2="950" y2="50" stroke="black" stroke-width="10" stroke-linecap="round" />
+  <line x1="50" y1="50" x2="50" y2="750" stroke="black" stroke-width="10" stroke-linecap="round" />
+  <rect x="185" y="185" width="30" height="30" fill="#7f8c8d" rx="4" />
+  <text x="200" y="205" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Desk</text>
+  <rect x="185" y="245" width="30" height="30" fill="#2c3e50" rx="4" />
+  <text x="200" y="265" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
+  <rect x="485" y="185" width="30" height="30" fill="#7f8c8d" rx="4" />
+  <text x="500" y="205" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Desk</text>
+  <rect x="485" y="245" width="30" height="30" fill="#2c3e50" rx="4" />
+  <text x="500" y="265" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
+  <rect x="785" y="185" width="30" height="30" fill="#7f8c8d" rx="4" />
+  <text x="800" y="205" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Desk</text>
+  <rect x="785" y="245" width="30" height="30" fill="#2c3e50" rx="4" />
+  <text x="800" y="265" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
+  <rect x="485" y="485" width="30" height="30" fill="#f1c40f" rx="4" />
+  <text x="500" y="505" font-family="Arial" font-size="8" text-anchor="middle" fill="white">ConferenceTable</text>
+</svg>

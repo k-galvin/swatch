@@ -1,161 +1,304 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swatch | A Language for Spatial Logic</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,soft,wght@9..144,100,900&family=Inter:wght@300;400;600&family=Fira+Code&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=Inter:wght@300;400;600&family=Fira+Code&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <header>
-        <div class="container">
-            <img src="swatch_logo_with_text.png" alt="Swatch Logo" class="logo">
-            <nav>
-                <ul>
-                    <li><a href="#story">Story</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#examples">Examples</a></li>
-                    <li><a href="https://github.com/k-galvin/swatch" class="btn-outline">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
+      <div class="container">
+        <a href="#top" class="logo-wrap">
+          <img src="swatch_logo.png" alt="Swatch Logo" class="header-logo" />
+          <span class="logo-text">swatch.</span>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="#story">Story</a></li>
+            <li><a href="#constraints">Logic</a></li>
+            <li><a href="#examples">Gallery</a></li>
+            <li>
+              <a href="https://github.com/k-galvin/swatch" class="btn-outline"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
     <main>
-        <section id="hero">
-            <div class="container">
-                <p class="eyebrow">The Spatial Logic Language</p>
-                <h1>Design the world, <br>one statement <br>at a time.</h1>
-                <div class="hero-actions">
-                    <a href="#examples" class="btn-primary">View the Gallery</a>
-                </div>
-            </div>
-        </section>
+      <!-- HERO -->
+      <section id="hero">
+        <div class="container">
+          <span class="eyebrow">A Language for Spatial Logic</span>
+          <h1>Design the world, <br />one statement <br />at a time.</h1>
+          <div class="hero-actions">
+            <a href="#examples" class="btn-primary">Explore Blueprints</a>
+          </div>
+        </div>
+      </section>
 
-        <section id="story">
-            <div class="container">
-                <div class="editorial-row">
-                    <div class="side-label">01 / The Vision</div>
-                    <div class="content">
-                        <h2>Architecture, <br>Programmable.</h2>
-                        <p>Swatch was born from the need for a simple, declarative way to describe architectural spaces. While professional CAD software is powerful, it is often too heavy for quick ideation and algorithmic layout generation. Swatch bridges the gap between manual drafting and automated design.</p>
-                        <p>We believe that architectural logic should be human-readable and programmable. By providing a lightweight syntax for layouts, walls, and furniture, Swatch allows designers to focus on spatial relationships while leveraging the power of loops and components to create complex, generative floor plans.</p>
-                    </div>
-                </div>
+      <!-- STORY -->
+      <section id="story">
+        <div class="container">
+          <div class="editorial-row">
+            <div class="side-label">Issue 01</div>
+            <div class="content">
+              <h2>Interior Design, <br />Humanized.</h2>
+              <p>
+                Swatch was born from the need for a simple, declarative way to
+                describe the spaces we inhabit. While professional CAD software
+                is powerful, it is often overkill for quick ideation and
+                non-professional use. Swatch bridges the gap between drafting
+                and living.
+              </p>
+              <p>
+                We believe that architectural logic should be human-readable and
+                programmable. By providing a lightweight syntax for layouts and
+                furniture, Swatch allows designers to focus on spatial
+                relationships while leveraging the power of loops to create
+                generative floor plans.
+              </p>
+              <p>
+                Built with modern compiler techniques, Swatch ensures that every
+                blueprint is semantically sound. It transforms abstract code
+                into structured spatial data, making the leap from imagination
+                to execution effortless for architects and dwellers alike.
+              </p>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
-        <section id="features">
-            <div class="container">
-                <div class="editorial-row">
-                    <div class="side-label">02 / Core Features</div>
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <h3>Declarative Primitives</h3>
-                            <p>Native support for Layout, Wall, and Furniture entities that map directly to spatial logic.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>Generative Logic</h3>
-                            <p>Built-in loop constructs and arithmetic expressions for algorithmic layout generation.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>Modular Components</h3>
-                            <p>Define reusable component blocks to modularize furniture sets or wall configurations.</p>
-                        </div>
-                        <div class="feature-item">
-                            <h3>Static Analysis</h3>
-                            <p>Rigorous type-checking and scope resolution ensure your blueprints are semantically sound.</p>
-                        </div>
-                    </div>
+      <!-- CONSTRAINTS -->
+      <section id="constraints">
+        <div class="container">
+          <div class="editorial-row">
+            <div class="side-label">Logic Checks</div>
+            <div class="content">
+              <h2>The Rules of the Room.</h2>
+              <p>
+                The Swatch compiler performs rigorous semantic checks to ensure
+                your design isn't just valid syntax, but logically sound space.
+              </p>
+
+              <div class="constraint-list">
+                <div class="constraint-item">
+                  <h4>Type Safety</h4>
+                  <p>
+                    Coordinates and quantities must be numeric. Layout names
+                    must be strings. No exceptions.
+                  </p>
                 </div>
+                <div class="constraint-item">
+                  <h4>Unique IDs</h4>
+                  <p>
+                    Variables, layouts, and components cannot be redeclared.
+                    Every piece of furniture needs a clear name.
+                  </p>
+                </div>
+                <div class="constraint-item">
+                  <h4>Scoped Units</h4>
+                  <p>
+                    Components are isolated. They can't see outside their walls
+                    unless you pass variables through the door.
+                  </p>
+                </div>
+                <div class="constraint-item">
+                  <h4>Spatial Bounds</h4>
+                  <p>
+                    Math must result in valid coordinates. Swatch flags negative
+                    dimensions and impossible geometry early.
+                  </p>
+                </div>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
-        <section id="examples">
-            <div class="container">
-                <div class="side-label">03 / The Gallery</div>
-                <h2>Example Blueprints</h2>
-                
-                <div class="example-stack">
-                    <!-- Studio -->
-                    <div class="ex-card">
-                        <div class="ex-info">
-                            <h3>Modern Studio</h3>
-                            <p>Modular seating and perimeter walls.</p>
-                        </div>
-                        <div class="ex-display">
-                            <div class="ex-code">
-                                <pre><code>component ModularSofa(x, y, pieces) {
+      <!-- EXAMPLES GALLERY -->
+      <section id="examples">
+        <div class="container">
+          <div class="side-label">Gallery</div>
+          <h2 style="margin-bottom: 80px">Blueprint Examples</h2>
+
+          <div class="example-stack">
+            <!-- Example 1: Modular Living (Studio) -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Component logic</span>
+                <h3>01 / Modular Living</h3>
+                <p>
+                  Demonstrating component definition and parametric loops to
+                  create a multi-piece sectional sofa.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>component ModularSofa(x, y, pieces) {
   for p in 0 ..< pieces {
     place Section at [x + p * 50, y];
   }
 }
 
-Layout "Studio" size [800, 600] {
+Layout "Modern Studio" size [800, 600] {
   Wall North from [50, 50] to [750, 50];
+  place KingBed at [150, 150];
   ModularSofa(300.0, 400.0, 3.0);
 }</code></pre>
-                            </div>
-                            <div class="ex-visual">
-                                <img src="studio.svg" alt="Studio SVG">
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              <div class="ex-visual">
+                <img src="studio.svg" alt="Modular Living SVG" />
+              </div>
+            </div>
 
-                    <!-- Generative -->
-                    <div class="ex-card">
-                        <div class="ex-info">
-                            <h3>Generative Row</h3>
-                            <p>Algorithmic furniture placement.</p>
-                        </div>
-                        <div class="ex-display">
-                            <div class="ex-code">
-                                <pre><code>Layout "Generative" size [500, 200] {
-  let x = 50.0;
-  repeat 5 {
-    place Chair at [x, 100];
-    x = x + 80.0;
+            <!-- Example 2: Algorithmic Desk (Office) -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Iteration</span>
+                <h3>02 / Algorithmic Desk</h3>
+                <p>
+                  Using variables and arithmetic logic to evenly space
+                  workstations in an office environment.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>component Workstation(x, y) {
+  place Desk at [x, y];
+  place Chair at [x, y + 60];
+}
+
+Layout "Office" size [1000, 800] {
+  for i in 0 ... 2 {
+    Workstation(200.0 + i * 300.0, 200.0);
   }
 }</code></pre>
-                            </div>
-                            <div class="ex-visual">
-                                <img src="generative.svg" alt="Generative SVG">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
+              <div class="ex-visual">
+                <img src="office.svg" alt="Algorithmic Desk SVG" />
+              </div>
             </div>
-        </section>
 
-        <section id="team">
-            <div class="container">
-                <div class="editorial-row">
-                    <div class="side-label">04 / The Author</div>
-                    <div class="author-bio">
-                        <h3>Kate Galvin</h3>
-                        <p>Computer Science student at LMU, focused on DSLs and architectural visualization. Lead architect of the Swatch compiler.</p>
-                        <a href="https://github.com/k-galvin" class="link-editorial">GitHub Profile &rarr;</a>
-                    </div>
-                </div>
+            <!-- Example 3: Dynamic Lighting (Gallery) -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Visual Installation</span>
+                <h3>03 / Dynamic Display</h3>
+                <p>
+                  Modular exhibition pedestals and structural partitions in a
+                  gallery setting.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>component DisplayPedestal(x, y, label) {
+  place Pedestal at [x, y];
+  place Art at [x, y] [label: label];
+}
+
+Layout "Main Gallery" size [1200, 800] {
+  Wall PartitionA from [400, 200] to [400, 600];
+  for i in 0 ... 4 {
+    let x_pos = 200.0 + i * 200.0;
+    DisplayPedestal(x_pos, 150.0, "Exhibit " + (i + 1));
+  }
+}</code></pre>
+              </div>
+              <div class="ex-visual">
+                <img src="gallery.svg" alt="Dynamic Display SVG" />
+              </div>
             </div>
-        </section>
+
+            <!-- Example 4: Symmetrical Entry (Library) -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Arithmetic</span>
+                <h3>04 / Symmetrical Entry</h3>
+                <p>
+                  Nested loops and mathematical offsets allow for precise,
+                  balanced positioning of library stacks.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>Layout "Great Library" size [1200, 1000] {
+  for row in 0 ... 2 {
+    let y_base = 200.0 + row * 250.0;
+    Wall Stack from [150, y_base] to [700, y_base];
+  }
+  for i in 0 ... 1 {
+    for j in 0 ... 2 {
+      StudyNook(900.0 + i * 150.0, 200.0 + j * 250.0);
+    }
+  }
+}</code></pre>
+              </div>
+              <div class="ex-visual">
+                <img src="library.svg" alt="Symmetrical Entry SVG" />
+              </div>
+            </div>
+
+            <!-- Example 5: Structural Shell (Kitchen) -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Primitives</span>
+                <h3>05 / Structural Shell</h3>
+                <p>
+                  Defining wall segments and islands to establish the
+                  professional layout of a culinary space.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>Layout "Professional Kitchen" size [800, 800] {
+  Wall NorthWall from [50, 50] to [750, 50];
+  Wall WestWall from [50, 50] to [50, 750];
+  
+  Wall Island from [300, 400] to [500, 400];
+  place Sink at [400, 400];
+}</code></pre>
+              </div>
+              <div class="ex-visual">
+                <img src="kitchen.svg" alt="Structural Shell SVG" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TEAM -->
+      <section id="team">
+        <div class="container">
+          <div class="editorial-row">
+            <div class="side-label">The Architect</div>
+            <div class="author-bio">
+              <h3>Kate Galvin</h3>
+              <p>
+                Kate is a Computer Science student at LMU, with an interest in
+                design and architecture. She believes code is one of the most
+                versatile building materials in the world.
+              </p>
+              <a href="https://github.com/k-galvin" class="link-editorial"
+                >Follow the progress &rarr;</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-        <div class="container">
-            <div class="footer-wrap">
-                <p>&copy; 2026 Swatch Language.</p>
-                <p>Built at LMU.</p>
-            </div>
+      <div class="container">
+        <div class="footer-wrap">
+          <p>&copy; 2026 Swatch Language.</p>
+          <p><a href="https://github.com/k-galvin/swatch">GitHub Repo</a></p>
         </div>
+      </div>
     </footer>
-
-    <script>
-      lucide.createIcons();
-    </script>
-</body>
+  </body>
 </html>
