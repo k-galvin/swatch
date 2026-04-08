@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swatch | A Language for Spatial Logic</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <img src="swatch_logo_with_text.png" alt="Swatch Logo" class="logo">
+            <nav>
+                <ul>
+                    <li><a href="#story">Story</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#examples">Examples</a></li>
+                    <li><a href="#team">Team</a></li>
+                    <li><a href="https://github.com/k-galvin/swatch" class="btn">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="hero">
+        <div class="container">
+            <h1>Design the World, <br><span>One Statement</span> at a Time.</h1>
+            <p>A spatial logic language for drafting, interior design, and generative floor plan visualization.</p>
+            <a href="#examples" class="btn-primary">See Swatch in Action</a>
+        </div>
+    </section>
+
+    <section id="story">
+        <div class="container">
+            <h2>The Story</h2>
+            <p>Swatch was born from the need for a simple, declarative way to describe architectural spaces. While professional CAD software is powerful, it is often too heavy for quick ideation and algorithmic layout generation. Swatch bridges the gap between manual drafting and automated design.</p>
+            <p>We believe that architectural logic should be human-readable and programmable. By providing a lightweight syntax for layouts, walls, and furniture, Swatch allows designers to focus on spatial relationships while leveraging the power of loops and components to create complex, generative floor plans.</p>
+            <p>Every Swatch script compiles directly into clean, scalable SVG, making it easy to share, print, and integrate into modern web workflows. Whether you are drafting a simple kitchen or generating a massive library, Swatch provides the primitives you need to bring your vision to life.</p>
+        </div>
+    </section>
+
+    <section id="examples">
+        <div class="container">
+            <h2>Examples</h2>
+            <div class="example-grid">
+                <div class="example-card">
+                    <h3>Modern Studio</h3>
+                    <pre><code>component ModularSofa(x, y, pieces) {
+  for p in 0 ..< pieces {
+    place Section at [x + p * 50, y];
+  }
+}
+
+Layout "Studio" size [800, 600] {
+  Wall North from [50, 50] to [750, 50];
+  ModularSofa(300, 400, 3);
+}</code></pre>
+                </div>
+                <div class="example-card">
+                    <h3>Generative Row</h3>
+                    <pre><code>Layout "Generative" size [500, 200] {
+  repeat 5 {
+    place Chair at [x, 100];
+    x = x + 80;
+  }
+}</code></pre>
+                </div>
+                <div class="example-card">
+                    <h3>Kitchen Logic</h3>
+                    <pre><code>Layout "Kitchen" size [400, 400] {
+  place Counter at [200, 50];
+  if hasIsland {
+    place Island at [200, 200];
+  }
+}</code></pre>
+                </div>
+                <div class="example-card">
+                    <h3>Office Desk</h3>
+                    <pre><code>Layout "Office" size [300, 300] {
+  place Desk at [150, 150] [color: #34495e];
+  place Chair at [150, 200] [rotate: 180];
+}</code></pre>
+                </div>
+                <div class="example-card">
+                    <h3>Art Gallery</h3>
+                    <pre><code>Layout "Gallery" size [600, 400] {
+  Wall W from [100, 100] to [500, 100];
+  place Art at [300, 100] [label: "Mona Lisa"];
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="team">
+        <div class="container">
+            <h2>The Developer</h2>
+            <div class="team-member">
+                <h3>Kate Galvin</h3>
+                <p>Computer Science student at LMU, passionate about DSLs, architectural visualization, and clean code. Lead architect and developer of the Swatch compiler.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Swatch Language Team. Hosted on GitHub Pages.</p>
+        </div>
+    </footer>
+</body>
+</html>
