@@ -1,11 +1,10 @@
 # Swatch
 
 <div align="center">
-  <img src="docs/swatch_logo.png" width="200" alt="Swatch logo" />
+  <img src="docs/swatch_logo_with_text.png" width="400" alt="Swatch logo" />
   <p><em>A spatial logic language for generative floor plan visualization.</em></p>
+  <p>Created by: Kate Galvin</p>
 </div>
-
-Author: Kate Galvin
 
 ## The Story
 
