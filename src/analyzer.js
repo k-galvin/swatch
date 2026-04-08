@@ -113,6 +113,20 @@ export default function analyze(match) {
       const callee = context.lookup(name);
       mustHaveBeenFound(callee, name, { at: idNode });
       const parsedArgs = args.asIteration().children.map((a) => a.rep());
+      if (callee.kind === "Component") {
+        must(
+          parsedArgs.length === callee.params.length,
+          `Expected ${callee.params.length} arguments but got ${parsedArgs.length}`,
+          { at: args },
+        );
+        parsedArgs.forEach((arg, i) =>
+          mustBeAssignable(
+            arg,
+            { toType: callee.params[i].type },
+            { at: args },
+          ),
+        );
+      }
       const type = callee.kind === "Component" ? core.voidType : callee.type;
       return core.call(callee, parsedArgs, type);
     },
@@ -199,16 +213,14 @@ export default function analyze(match) {
     },
 
     WallStmt(_wall, id, _from, p1, _to, p2, props, _semi) {
-      return core.wall(
-        id.sourceString,
-        p1.rep(),
-        p2.rep(),
-        props.rep()[0] ?? {},
-      );
+      const from = p1.rep();
+      const to = p2.rep();
+      return core.wall(id.sourceString, from, to, props.rep()[0] ?? {});
     },
 
     PlaceStmt(_place, id, _at, p, props, _semi) {
-      return core.furniture(id.sourceString, p.rep(), props.rep()[0] ?? {});
+      const at = p.rep();
+      return core.furniture(id.sourceString, at, props.rep()[0] ?? {});
     },
 
     Type_array(_open, type, _close) {
@@ -224,7 +236,10 @@ export default function analyze(match) {
     },
 
     Point(_open, e1, _comma, e2, _close) {
-      return [e1.rep(), e2.rep()];
+      const [v1, v2] = [e1.rep(), e2.rep()];
+      mustHaveNumericType(v1, { at: e1 });
+      mustHaveNumericType(v2, { at: e2 });
+      return [v1, v2];
     },
     Props(_open, list, _close) {
       return Object.fromEntries(
@@ -315,6 +330,20 @@ export default function analyze(match) {
     Exp9_call(calleeNode, _open, args, _close) {
       const callee = calleeNode.rep();
       const parsedArgs = args.asIteration().children.map((a) => a.rep());
+      if (callee.kind === "Component") {
+        must(
+          parsedArgs.length === callee.params.length,
+          `Expected ${callee.params.length} arguments but got ${parsedArgs.length}`,
+          { at: args },
+        );
+        parsedArgs.forEach((arg, i) =>
+          mustBeAssignable(
+            arg,
+            { toType: callee.params[i].type },
+            { at: args },
+          ),
+        );
+      }
       const type = callee.kind === "Component" ? core.voidType : callee.type;
       return core.call(callee, parsedArgs, type);
     },
