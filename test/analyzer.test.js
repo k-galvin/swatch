@@ -31,12 +31,22 @@ const semanticChecks = [
   ["array length works", "let x = #[1, 2, 3];"],
   ["random works", "let x = random [1, 2, 3];"],
   ["any type assignment", 'let x: any = 5; x = "hello";'],
-  ["string concatenation", 'let x = "a" + "b"; let y = "a" + 5; let z = 5 + "b";'],
+  [
+    "string concatenation",
+    'let x = "a" + "b"; let y = "a" + 5; let z = 5 + "b";',
+  ],
   ["empty array literal", "let x = [];"],
   ["array type declaration", "let x: [float] = [1.0];"],
-  ["optional type equivalence", "let x: float? = 1.0; let y: float? = 2.0; let z = x == y;"],
+  [
+    "optional type equivalence",
+    "let x: float? = 1.0; let y: float? = 2.0; let z = x == y;",
+  ],
   ["component call in expression", "component C() {} let x = C();"],
   ["print call in expression", "let x = print(1);"],
+  [
+    "unary minus on variable in bounds check",
+    "Layout L size [100, 100] { let x = 10; place Chair at [-x, 50]; }",
+  ],
 ];
 
 const semanticErrors = [
@@ -65,6 +75,21 @@ const semanticErrors = [
   ],
   ["unary operator type mismatch", "let x = -true;", /Expected a number/],
   ["out of loop break", "break;", /Break can only appear in a loop/],
+  [
+    "X coordinate out of bounds",
+    "Layout L size [100, 100] { place Chair at [150, 50]; }",
+    /X coordinate 150 \(with radius 20\) out of layout bounds/,
+  ],
+  [
+    "Y coordinate out of bounds",
+    "Layout L size [100, 100] { Wall w from [0, 0] to [50, 150]; }",
+    /Y coordinate 150 \(with radius 0\) out of layout bounds/,
+  ],
+  [
+    "negative coordinate out of bounds",
+    "Layout L size [100, 100] { place Chair at [-10, 50]; }",
+    /X coordinate -10 \(with radius 20\) out of layout bounds/,
+  ],
 ];
 
 describe("The Analyzer", () => {

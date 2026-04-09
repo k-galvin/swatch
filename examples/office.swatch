@@ -1,22 +1,46 @@
-Designer "Manager" Date "2026-03-18"
+Designer "Facilities Manager" Date "2026-03-18"
 
 const WIDTH = 1000;
 const HEIGHT = 800;
-let deskColor = #7f8c8d;
+const STEEL = #7f8c8d;
+const GLASS = #3498db;
 
 component Workstation(x: float, y: float) {
-  place Desk at [x, y] [color: deskColor];
-  place Chair at [x, y + 60] [color: #2c3e50];
+  place Desk at [x, y] [color: STEEL, width: 60];
+  place Chair at [x, y + 55] [color: #2c3e50];
 }
 
-Layout "Office" size [WIDTH, HEIGHT] {
-  // Walls with padding
-  Wall North from [50, 50] to [950, 50] [thickness: 10];
-  Wall West from [50, 50] to [50, 750] [thickness: 10];
-  
+Layout "Corporate Office" size [WIDTH, HEIGHT] {
+  // Perimeter Walls
+  Wall North from [30, 30] to [970, 30] [thickness: 15];
+  Wall East from [970, 30] to [970, 770] [thickness: 15];
+  Wall SouthLeft from [30, 770] to [400, 770] [thickness: 15];
+  Wall SouthRight from [600, 770] to [970, 770] [thickness: 15];
+  Wall West from [30, 30] to [30, 770] [thickness: 15];
+
+  // Glass Entryway
+  Wall Entrance from [400, 770] to [600, 770] [color: GLASS, thickness: 5];
+
+  // Employee Workstation Grid (Top)
   for i in 0 ... 2 {
-    Workstation(200.0 + i * 300.0, 200.0);
+    for j in 0 ... 1 {
+      Workstation(250.0 + i * 250.0, 150.0 + j * 150.0);
+    }
   }
-  
-  place ConferenceTable at [500, 500] [color: #f1c40f];
+
+  // Central Conference Zone
+  place Table at [500, 500] [color: #f1c40f, width: 120, label: "Conference"];
+  for c in 0 ... 3 {
+    place Chair at [400.0 + c * 65.0, 440.0] [color: #333333];
+    place Chair at [400.0 + c * 65.0, 560.0] [color: #333333];
+  }
+
+  // Executive Corner (Bottom Right)
+  place Desk at [850, 650] [color: #7e5233, width: 80, label: "Executive"];
+  place Chair at [850, 600] [color: #2c3e50];
+  place Sofa at [750, 680] [color: #2980b9, width: 100, label: "Lounge"];
+
+  // Storage / Utility Wall (West)
+  Wall Storage from [80, 100] to [80, 700] [color: STEEL, thickness: 40];
+  place Sink at [80, 400] [color: GLASS, label: "Coffee"];
 }

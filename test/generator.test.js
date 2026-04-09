@@ -11,7 +11,7 @@ const fixtures = [
     source: 'Layout "L1" size [100, 100] { }',
     expected: [
       /<svg.*width="100" height="100".*>/,
-      /<rect width="100%" height="100%" fill="#fcfcfc" \/>/,
+      /<rect width="100%" height="100%" fill="white" \/>/,
     ],
   },
   {
@@ -24,7 +24,7 @@ const fixtures = [
         let base = 2;
         Wall w from [0, 0] to [base ** 3, 10]; 
       }`,
-    expected: [/x2="8"/, /(<rect.*width="30".*?>.*?){3}/s],
+    expected: [/x2="8"/, /(<g class="furniture".*?<circle.*?>.*?){3}/s],
   },
   {
     name: "components and scoped variables",
@@ -36,7 +36,7 @@ const fixtures = [
         Post(50.0, 50.0);
         Post(150.0, 150.0);
       }`,
-    expected: [/x="35" y="35"/, /x="135" y="135"/, /fill="#000000"/],
+    expected: [/x="30" y="30"/, /x="130" y="130"/, /fill="#000000"/, /rx="6"/],
   },
   {
     name: "assignments and conditionals",
@@ -60,7 +60,11 @@ const fixtures = [
           place Pillar at [i * 50.0, i * 50.0];
         }
       }`,
-    expected: [/(<rect.*width="30".*?>.*?){3}/s, /x="35" y="35"/, /x="135" y="135"/],
+    expected: [
+      /(<g class="furniture".*?<rect.*?>.*?){3}/s,
+      /x="30" y="30"/,
+      /x="130" y="130"/,
+    ],
   },
   {
     name: "ternary and logical not",
@@ -137,7 +141,7 @@ describe("The Generator", () => {
   it("handles multiple layouts by executing all program statements", () => {
     const source = `
       Layout "L1" size [100, 100] { Wall w from [0,0] to [10,10]; }
-      Layout "L2" size [100, 100] { place Chair at [5,5]; }
+      Layout "L2" size [100, 100] { place Chair at [20,20]; }
     `;
     const output = generate(analyze(parse(source)));
     assert.match(output, /<line/);
@@ -153,12 +157,22 @@ describe("The Generator", () => {
     `;
     const output = generate(analyze(parse(source)));
     assert.match(output, /fill="#ff0000"/);
+    // Bed geometry: size 40 -> w=60, h=40. x = 50 - 30 = 20, y = 50 - 20 = 30
+    assert.match(output, /<rect x="20" y="30" width="60" height="40"/);
+    // Pillow: x = 20+5 = 25, y = 30+5 = 35. w=20, h=40-10=30
+    assert.match(output, /<rect x="25" y="35" width="20" height="30"/);
   });
 
   it("handles programs with no layouts gracefully", () => {
     const source = "let x = 10;";
     const output = generate(analyze(parse(source)));
     assert.ok(output.includes("<svg"));
+  });
+
+  it("ensures walls have round linecaps for clean joins", () => {
+    const source = `Layout "L" size [100, 100] { Wall w from [0,0] to [10,10]; }`;
+    const output = generate(analyze(parse(source)));
+    assert.match(output, /stroke-linecap="round"/);
   });
 
   it("covers all literal types in evaluate()", () => {
@@ -194,26 +208,45 @@ describe("The Generator", () => {
     assert.ok(output.includes("<svg"));
   });
 
+  it("covers all furniture archetypes", () => {
+    const source = `
+      Layout "Archetypes" size [500, 500] {
+        place Table at [50, 50];
+        place Desk at [150, 150];
+        place Sink at [250, 250];
+        place Stool at [350, 350];
+      }
+    `;
+    const output = generate(analyze(parse(source)));
+    assert.match(output, /<rect.*rx="2"/); // Table/Desk
+    assert.match(output, /<circle.*r="14"/); // Sink circle (20 * 0.7)
+    assert.match(output, /<circle.*r="20"/); // Stool circle
+  });
+
   it("covers Variable value fallback in evaluate()", () => {
     const v = core.variable("v", false, core.intType);
     v.value = 42n; // Manually add a value
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], [
-        core.furniture("Chair", [v, v], {})
-      ]),
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [core.furniture("Chair", [v, v], {})],
+      ),
     ]);
     const output = generate(program);
-    assert.match(output, /x="27" y="27"/);
+    assert.match(output, /cx="42" cy="42"/);
   });
 
   it("covers bigint in evaluate()", () => {
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], [
-        core.furniture("Chair", [42n, 42n], {})
-      ]),
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [core.furniture("Chair", [42n, 42n], {})],
+      ),
     ]);
     const output = generate(program);
-    assert.match(output, /x="27" y="27"/);
+    assert.match(output, /cx="42" cy="42"/);
   });
 
   it("covers non-constant unary and conditional", () => {
@@ -233,9 +266,11 @@ describe("The Generator", () => {
 
   it("covers undefined in evaluate()", () => {
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], [
-        core.furniture("Chair", [null, null], {})
-      ]),
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [core.furniture("Chair", [null, null], {})],
+      ),
     ]);
     // Manually pass undefined to evaluate via a mock node if possible
     // Or just rely on the fact that furniture at[0] can be undefined
@@ -250,14 +285,15 @@ describe("The Generator", () => {
         "UnknownOp",
         [core.intLiteral(100n), core.intLiteral(100n)],
         [
-          core.variableDeclaration(
-            core.variable("x", false, core.floatType),
-            { kind: "BinaryExpression", op: "??", left: core.intLiteral(1n), right: core.intLiteral(2n) },
-          ),
-          core.variableDeclaration(
-            core.variable("y", false, core.anyType),
-            { kind: "UnknownKind" },
-          ),
+          core.variableDeclaration(core.variable("x", false, core.floatType), {
+            kind: "BinaryExpression",
+            op: "??",
+            left: core.intLiteral(1n),
+            right: core.intLiteral(2n),
+          }),
+          core.variableDeclaration(core.variable("y", false, core.anyType), {
+            kind: "UnknownKind",
+          }),
         ],
       ),
     ]);
@@ -267,10 +303,25 @@ describe("The Generator", () => {
 
   it("covers string concatenation in evaluate()", () => {
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], [
-        core.variableDeclaration(core.variable("s", true, core.stringType), core.stringLiteral("Ex")),
-        core.variableDeclaration(core.variable("t", true, core.stringType), core.binary("+", core.variable("s", true, core.stringType), core.stringLiteral("hibit"), core.stringType)),
-      ]),
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(
+            core.variable("s", true, core.stringType),
+            core.stringLiteral("Ex"),
+          ),
+          core.variableDeclaration(
+            core.variable("t", true, core.stringType),
+            core.binary(
+              "+",
+              core.variable("s", true, core.stringType),
+              core.stringLiteral("hibit"),
+              core.stringType,
+            ),
+          ),
+        ],
+      ),
     ]);
     const output = generate(program);
     assert.ok(output.includes("<svg"));
@@ -278,10 +329,25 @@ describe("The Generator", () => {
 
   it("covers numeric addition in evaluate()", () => {
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], [
-        core.variableDeclaration(core.variable("x", true, core.intType), core.intLiteral(1n)),
-        core.variableDeclaration(core.variable("y", true, core.intType), core.binary("+", core.variable("x", true, core.intType), core.intLiteral(2n), core.intType)),
-      ]),
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(
+            core.variable("x", true, core.intType),
+            core.intLiteral(1n),
+          ),
+          core.variableDeclaration(
+            core.variable("y", true, core.intType),
+            core.binary(
+              "+",
+              core.variable("x", true, core.intType),
+              core.intLiteral(2n),
+              core.intType,
+            ),
+          ),
+        ],
+      ),
     ]);
     const output = generate(program);
     assert.ok(output.includes("<svg"));
@@ -289,8 +355,13 @@ describe("The Generator", () => {
 
   it("covers non-array statements in execute()", () => {
     const program = core.program(null, [
-      core.layout("L", [core.intLiteral(100n), core.intLiteral(100n)], 
-        core.variableDeclaration(core.variable("x", false, core.intType), core.intLiteral(1n))
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        core.variableDeclaration(
+          core.variable("x", false, core.intType),
+          core.intLiteral(1n),
+        ),
       ),
     ]);
     const output = generate(program);

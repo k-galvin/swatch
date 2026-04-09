@@ -1,31 +1,42 @@
-Designer "The Architect" Date "2026-03-18"
+Designer "Chief Librarian" Date "2026-03-18"
 
 const OAK = #7e5233;
 const FELT = #27ae60;
+const MARBLE = #ecf0f1;
 
-component StudyNook(x: float, y: float) {
-  place Table at [x, y] [color: FELT];
-  place Chair at [x, y + 40] [color: #333333];
+component BookStack(x: float, y: float) {
+  Wall Shelf from [x, y] to [x + 200.0, y] [color: OAK, thickness: 25];
 }
 
-Layout "Great Library" size [1200, 1000] {
-  // Main Perimeter
-  Wall West from [50, 50] to [50, 950] [thickness: 20];
-  Wall North from [50, 50] to [1150, 50] [thickness: 20];
-  Wall East from [1150, 50] to [1150, 950] [thickness: 20];
+component StudyNook(x: float, y: float) {
+  place Table at [x, y] [color: FELT, width: 60];
+  place Chair at [x, y + 55] [color: #333333];
+}
 
-  // Spread out Bookstack Rows
-  for row in 0 ... 2 {
-    let y_base = 200.0 + row * 250.0;
-    Wall Stack from [150, y_base] to [700, y_base] [color: OAK, thickness: 30];
-  }
+Layout "Grand Library" size [1200, 1000] {
+  // Complete Perimeter Shell
+  Wall North from [30, 30] to [1170, 30] [thickness: 20];
+  Wall East from [1170, 30] to [1170, 970] [thickness: 20];
+  Wall SouthLeft from [30, 970] to [500, 970] [thickness: 20];
+  Wall SouthRight from [700, 970] to [1170, 970] [thickness: 20];
+  Wall West from [30, 30] to [30, 970] [thickness: 20];
 
-  // Reading Area Grid
-  for i in 0 ... 1 {
-    for j in 0 ... 2 {
-      StudyNook(900.0 + i * 150.0, 200.0 + j * 250.0);
+  // The Stacks (Left Wing)
+  for col in 0 ... 1 {
+    for row in 0 ... 5 {
+      BookStack(100.0 + col * 300.0, 150.0 + row * 120.0);
     }
   }
 
-  place CircularDesk at [400, 800] [color: #e67e22];
+  // Reading Area (Right Wing)
+  for i in 0 ... 1 {
+    for j in 0 ... 3 {
+      StudyNook(900.0 + i * 180.0, 150.0 + j * 180.0);
+    }
+  }
+
+  // Reference & Checkout Desk
+  Wall Checkout from [500, 850] to [700, 850] [color: OAK, thickness: 40];
+  place Desk at [600, 900] [color: MARBLE, label: "Librarian"];
+  place Chair at [600, 950] [color: #333333];
 }

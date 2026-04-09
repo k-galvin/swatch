@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Swatch | A Language for Spatial Logic</title>
+    <title>swatch</title>
+    <link rel="icon" type="image/png" href="swatch_logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -92,31 +93,41 @@
 
               <div class="constraint-list">
                 <div class="constraint-item">
-                  <h4>Type Safety</h4>
+                  <h4>Scope & Identifier Integrity</h4>
                   <p>
-                    Coordinates and quantities must be numeric. Layout names
-                    must be strings. No exceptions.
+                    Redeclaration prevention, definite declaration checks, and
+                    lexical shadowing rules for nested loops and components.
                   </p>
                 </div>
                 <div class="constraint-item">
-                  <h4>Unique IDs</h4>
+                  <h4>Strict Type Safety</h4>
                   <p>
-                    Variables, layouts, and components cannot be redeclared.
-                    Every piece of furniture needs a clear name.
+                    Strong typing for all spatial operations, assignment
+                    compatibility with numeric promotion, and structural
+                    equality for complex types.
                   </p>
                 </div>
                 <div class="constraint-item">
-                  <h4>Scoped Units</h4>
+                  <h4>Operational Safety</h4>
                   <p>
-                    Components are isolated. They can't see outside their walls
-                    unless you pass variables through the door.
+                    Loop integrity for range bounds, contextual legality for
+                    break statements, and immutable constant enforcement.
                   </p>
                 </div>
                 <div class="constraint-item">
-                  <h4>Spatial Bounds</h4>
+                  <h4>Spatial Logic</h4>
                   <p>
-                    Math must result in valid coordinates. Swatch flags negative
-                    dimensions and impossible geometry early.
+                    The compiler calculates physical bounding boxes to prevent
+                    furniture from colliding with walls, ensuring every
+                    blueprint is structurally and physically possible.
+                  </p>
+                </div>
+                <div class="constraint-item">
+                  <h4>Security & Output Integrity</h4>
+                  <p>
+                    Sanitized SVG generation to prevent XSS, coordinate
+                    validation to ensure geometric soundness, and memory-safe
+                    execution.
                   </p>
                 </div>
               </div>
@@ -143,16 +154,44 @@
                 </p>
               </div>
               <div class="ex-code-container">
-                <pre><code>component ModularSofa(x, y, pieces) {
+                <pre><code>Designer "Kate" Date "2026-03-18"
+
+const STEEL = #7f8c8d;
+const FABRIC = #2980b9;
+
+component ModularSofa(x: float, y: float, pieces: float) {
   for p in 0 ..< pieces {
-    place Section at [x + p * 50, y];
+    place Section at [x + p * 50.0, y] [color: FABRIC];
   }
 }
 
-Layout "Modern Studio" size [800, 600] {
-  Wall North from [50, 50] to [750, 50];
-  place KingBed at [150, 150];
-  ModularSofa(300.0, 400.0, 3.0);
+Layout "Modern Studio" size [500, 450] {
+  // Perimeter Shell
+  Wall North from [20, 20] to [480, 20] [thickness: 10];
+  Wall East from [480, 20] to [480, 430] [thickness: 10];
+  
+  // South Wall with gap for the door
+  Wall SouthLeft from [20, 430] to [380, 430] [thickness: 10];
+  Wall SouthRight from [450, 430] to [480, 430] [thickness: 10];
+  Wall West from [20, 20] to [20, 430] [thickness: 10];
+
+  // Door Entry
+  place Door at [415, 430] [color: #e67e22, width: 40];
+
+  // Kitchenette (Top Right)
+  Wall Counter from [350, 40] to [350, 150] [color: STEEL, thickness: 30];
+  place Sink at [350, 85] [color: #3498db, width: 20];
+  place Fridge at [420, 50] [color: #ecf0f1];
+
+  // Sleeping Zone (Top Left)
+  place Bed at [100, 100] [color: #f1c40f, width: 80];
+
+  // Generative Seating (Bottom)
+  ModularSofa(100.0, 300.0, 3.0);
+  
+  // Media Area
+  Wall MediaBench from [100, 410] to [200, 410] [color: #333333, thickness: 12];
+  place TV at [150, 410] [color: #000000];
 }</code></pre>
               </div>
               <div class="ex-visual">
@@ -171,15 +210,51 @@ Layout "Modern Studio" size [800, 600] {
                 </p>
               </div>
               <div class="ex-code-container">
-                <pre><code>component Workstation(x, y) {
-  place Desk at [x, y];
-  place Chair at [x, y + 60];
+                <pre><code>Designer "Facilities Manager" Date "2026-03-18"
+
+const WIDTH = 1000;
+const HEIGHT = 800;
+const STEEL = #7f8c8d;
+const GLASS = #3498db;
+
+component Workstation(x: float, y: float) {
+  place Desk at [x, y] [color: STEEL, width: 60];
+  place Chair at [x, y + 55] [color: #2c3e50];
 }
 
-Layout "Office" size [1000, 800] {
+Layout "Corporate Office" size [WIDTH, HEIGHT] {
+  // Perimeter Walls
+  Wall North from [30, 30] to [970, 30] [thickness: 15];
+  Wall East from [970, 30] to [970, 770] [thickness: 15];
+  Wall SouthLeft from [30, 770] to [400, 770] [thickness: 15];
+  Wall SouthRight from [600, 770] to [970, 770] [thickness: 15];
+  Wall West from [30, 30] to [30, 770] [thickness: 15];
+
+  // Glass Entryway
+  Wall Entrance from [400, 770] to [600, 770] [color: GLASS, thickness: 5];
+
+  // Employee Workstation Grid (Top)
   for i in 0 ... 2 {
-    Workstation(200.0 + i * 300.0, 200.0);
+    for j in 0 ... 1 {
+      Workstation(250.0 + i * 250.0, 150.0 + j * 150.0);
+    }
   }
+
+  // Central Conference Zone
+  place Table at [500, 500] [color: #f1c40f, width: 120, label: "Conference"];
+  for c in 0 ... 3 {
+    place Chair at [400.0 + c * 65.0, 440.0] [color: #333333];
+    place Chair at [400.0 + c * 65.0, 560.0] [color: #333333];
+  }
+
+  // Executive Corner (Bottom Right)
+  place Desk at [850, 650] [color: #7e5233, width: 80, label: "Executive"];
+  place Chair at [850, 600] [color: #2c3e50];
+  place Sofa at [750, 680] [color: #2980b9, width: 100, label: "Lounge"];
+
+  // Storage / Utility Wall (West)
+  Wall Storage from [80, 100] to [80, 700] [color: STEEL, thickness: 40];
+  place Sink at [80, 400] [color: GLASS, label: "Coffee"];
 }</code></pre>
               </div>
               <div class="ex-visual">
@@ -198,17 +273,28 @@ Layout "Office" size [1000, 800] {
                 </p>
               </div>
               <div class="ex-code-container">
-                <pre><code>component DisplayPedestal(x, y, label) {
-  place Pedestal at [x, y];
-  place Art at [x, y] [label: label];
+                <pre><code>Designer "Curator" Date "2026-03-18"
+
+const WALL_COLOR = #e74c3c;
+const STATUE_COLOR = #95a5a6;
+
+component DisplayPedestal(x: float, y: float, label: string) {
+  place Pedestal at [x, y] [color: #ecf0f1, width: 60];
+  place Art at [x, y] [color: STATUE_COLOR, label: label];
 }
 
 Layout "Main Gallery" size [1200, 800] {
-  Wall PartitionA from [400, 200] to [400, 600];
+  // Main structural partitions
+  Wall PartitionA from [400, 250] to [400, 600] [color: WALL_COLOR, thickness: 12];
+  Wall PartitionB from [800, 250] to [800, 600] [color: WALL_COLOR, thickness: 12];
+
+  // Generative installation along the north wall (shifted down to avoid clipping)
   for i in 0 ... 4 {
     let x_pos = 200.0 + i * 200.0;
     DisplayPedestal(x_pos, 150.0, "Exhibit " + (i + 1));
   }
+
+  place Fountain at [600, 400] [color: #3498db, width: 80];
 }</code></pre>
               </div>
               <div class="ex-visual">
@@ -227,16 +313,47 @@ Layout "Main Gallery" size [1200, 800] {
                 </p>
               </div>
               <div class="ex-code-container">
-                <pre><code>Layout "Great Library" size [1200, 1000] {
-  for row in 0 ... 2 {
-    let y_base = 200.0 + row * 250.0;
-    Wall Stack from [150, y_base] to [700, y_base];
-  }
-  for i in 0 ... 1 {
-    for j in 0 ... 2 {
-      StudyNook(900.0 + i * 150.0, 200.0 + j * 250.0);
+                <pre><code>Designer "Chief Librarian" Date "2026-03-18"
+
+const OAK = #7e5233;
+const FELT = #27ae60;
+const MARBLE = #ecf0f1;
+
+component BookStack(x: float, y: float) {
+  Wall Shelf from [x, y] to [x + 200.0, y] [color: OAK, thickness: 25];
+}
+
+component StudyNook(x: float, y: float) {
+  place Table at [x, y] [color: FELT, width: 60];
+  place Chair at [x, y + 55] [color: #333333];
+}
+
+Layout "Grand Library" size [1200, 1000] {
+  // Complete Perimeter Shell
+  Wall North from [30, 30] to [1170, 30] [thickness: 20];
+  Wall East from [1170, 30] to [1170, 970] [thickness: 20];
+  Wall SouthLeft from [30, 970] to [500, 970] [thickness: 20];
+  Wall SouthRight from [700, 970] to [1170, 970] [thickness: 20];
+  Wall West from [30, 30] to [30, 970] [thickness: 20];
+
+  // The Stacks (Left Wing)
+  for col in 0 ... 1 {
+    for row in 0 ... 5 {
+      BookStack(100.0 + col * 300.0, 150.0 + row * 120.0);
     }
   }
+
+  // Reading Area (Right Wing)
+  for i in 0 ... 1 {
+    for j in 0 ... 3 {
+      StudyNook(900.0 + i * 180.0, 150.0 + j * 180.0);
+    }
+  }
+
+  // Reference & Checkout Desk
+  Wall Checkout from [500, 850] to [700, 850] [color: OAK, thickness: 40];
+  place Desk at [600, 900] [color: MARBLE, label: "Librarian"];
+  place Chair at [600, 950] [color: #333333];
 }</code></pre>
               </div>
               <div class="ex-visual">
@@ -255,12 +372,45 @@ Layout "Main Gallery" size [1200, 800] {
                 </p>
               </div>
               <div class="ex-code-container">
-                <pre><code>Layout "Professional Kitchen" size [800, 800] {
-  Wall NorthWall from [50, 50] to [750, 50];
-  Wall WestWall from [50, 50] to [50, 750];
-  
-  Wall Island from [300, 400] to [500, 400];
-  place Sink at [400, 400];
+                <pre><code>Designer "Executive Chef" Date "2026-03-18"
+
+const ACCENT = #e74c3c;
+const WOOD = #7e5233;
+const STEEL = #95a5a6;
+
+component Station(x: float, y: float, type: string, col: color) {
+  place type at [x, y] [color: col];
+}
+
+Layout "Commercial Kitchen" size [800, 800] {
+  // Main Perimeter Walls
+  Wall North from [30, 30] to [770, 30] [color: ACCENT, thickness: 15];
+  Wall East from [770, 30] to [770, 770] [color: ACCENT, thickness: 15];
+  Wall South from [30, 770] to [770, 770] [color: ACCENT, thickness: 15];
+  Wall West from [30, 30] to [30, 770] [color: ACCENT, thickness: 15];
+
+  // Continuous Perimeter Counter (U-Shape)
+  Wall NorthCounter from [100, 70] to [700, 70] [color: STEEL, thickness: 45];
+  Wall WestCounter from [70, 100] to [70, 700] [color: STEEL, thickness: 45];
+  Wall SouthCounter from [100, 730] to [700, 730] [color: STEEL, thickness: 45];
+
+  // Cooking Line (North)
+  for i in 0 ... 3 {
+    Station(200.0 + i * 150.0, 75.0, "Range", #c0392b);
+  }
+
+  // Cold Storage (South)
+  for j in 0 ... 3 {
+    Station(200.0 + j * 150.0, 725.0, "Fridge", #ecf0f1);
+  }
+
+  // Large Prep Island with Double Sinks
+  Wall Island from [300, 400] to [500, 400] [color: WOOD, thickness: 80];
+  place Sink at [350, 400] [color: #3498db];
+  place Sink at [450, 400] [color: #3498db];
+
+  // Pass-through Station (West)
+  place Table at [125, 400] [color: STEEL, width: 60];
 }</code></pre>
               </div>
               <div class="ex-visual">

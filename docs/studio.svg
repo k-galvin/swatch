@@ -1,25 +1,86 @@
-<svg id="Modern Studio_1" width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-  
-  <text x="10" y="20" font-family="Arial" font-size="12" fill="#999">Designer: Kate | Date: 2026-03-18</text>
-  <rect width="100%" height="100%" fill="#fcfcfc" />
-  <line x1="50" y1="50" x2="750" y2="50" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line x1="750" y1="50" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line x1="50" y1="550" x2="750" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <line x1="50" y1="50" x2="50" y2="550" stroke="black" stroke-width="12" stroke-linecap="round" />
-  <rect x="135" y="135" width="30" height="30" fill="#f1c40f" rx="4" />
-  <text x="150" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">KingBed</text>
-  <line x1="280" y1="50" x2="280" y2="250" stroke="#7f8c8d" stroke-width="5" stroke-linecap="round" />
-  <rect x="635" y="135" width="30" height="30" fill="#7f8c8d" rx="4" />
-  <text x="650" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">L_Desk</text>
-  <rect x="585" y="135" width="30" height="30" fill="#2c3e50" rx="4" />
-  <text x="600" y="155" font-family="Arial" font-size="8" text-anchor="middle" fill="white">ProChair</text>
-  <rect x="285" y="385" width="30" height="30" fill="#2980b9" rx="4" />
-  <text x="300" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
-  <rect x="335" y="385" width="30" height="30" fill="#2980b9" rx="4" />
-  <text x="350" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
-  <rect x="385" y="385" width="30" height="30" fill="#2980b9" rx="4" />
-  <text x="400" y="405" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Section</text>
-  <line x1="300" y1="520" x2="500" y2="520" stroke="#333333" stroke-width="15" stroke-linecap="round" />
-  <rect x="385" y="505" width="30" height="30" fill="#000000" rx="4" />
-  <text x="400" y="525" font-family="Arial" font-size="8" text-anchor="middle" fill="white">TV</text>
+<svg id="Modern Studio_1" width="500" height="490" viewBox="0 0 500 490" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+      <circle cx="0" cy="0" r="1.5" fill="#e0e0e0" />
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="2" result="offsetblur" />
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="white" />
+  <rect width="100%" height="450" fill="url(#grid)" />
+  <rect x="0" y="450" width="100%" height="40" fill="#f9f9f9" />
+  <line x1="0" y1="450" x2="500" y2="450" stroke="#eee" stroke-width="1" />
+  <text x="15" y="475" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#888">
+    DESIGNER: Kate | DATE: 2026-03-18 | Modern Studio_1
+  </text>
+  <line x1="20" y1="20" x2="480" y2="20" stroke="#2c3e50" stroke-width="10" stroke-linecap="round" />
+  <line x1="20" y1="20" x2="480" y2="20" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <line x1="480" y1="20" x2="480" y2="430" stroke="#2c3e50" stroke-width="10" stroke-linecap="round" />
+  <line x1="480" y1="20" x2="480" y2="430" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <line x1="20" y1="430" x2="380" y2="430" stroke="#2c3e50" stroke-width="10" stroke-linecap="round" />
+  <line x1="20" y1="430" x2="380" y2="430" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <line x1="450" y1="430" x2="480" y2="430" stroke="#2c3e50" stroke-width="10" stroke-linecap="round" />
+  <line x1="450" y1="430" x2="480" y2="430" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <line x1="20" y1="20" x2="20" y2="430" stroke="#2c3e50" stroke-width="10" stroke-linecap="round" />
+  <line x1="20" y1="20" x2="20" y2="430" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <line x1="350" y1="40" x2="350" y2="150" stroke="#7f8c8d" stroke-width="30" stroke-linecap="round" />
+  <line x1="350" y1="40" x2="350" y2="150" stroke="white" stroke-width="12" stroke-linecap="round" opacity="0.3" />
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="340" y="75" width="20" height="20" fill="#3498db" rx="4" />
+    <circle cx="350" cy="85" r="7" fill="white" opacity="0.2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="400" y="30" width="40" height="40" fill="#ecf0f1" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="40" y="60" width="120" height="80" fill="#f1c40f" rx="4" />
+    <rect x="45" y="65" width="20" height="70" fill="white" opacity="0.2" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="80" y="280" width="40" height="40" fill="#2980b9" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="130" y="280" width="40" height="40" fill="#2980b9" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="180" y="280" width="40" height="40" fill="#2980b9" rx="6" />
+  </g>
+  <line x1="100" y1="410" x2="200" y2="410" stroke="#333333" stroke-width="12" stroke-linecap="round" />
+  <line x1="100" y1="410" x2="200" y2="410" stroke="white" stroke-width="4.800000000000001" stroke-linecap="round" opacity="0.3" />
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="130" y="390" width="40" height="40" fill="#000000" rx="6" />
+  </g>
+  <g transform="translate(350, 107)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Sink</text>
+  </g>
+  <g transform="translate(420, 82)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Fridge</text>
+  </g>
+  <g transform="translate(100, 152)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Bed</text>
+  </g>
+  <g transform="translate(100, 332)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Section</text>
+  </g>
+  <g transform="translate(150, 347)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Section</text>
+  </g>
+  <g transform="translate(200, 332)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Section</text>
+  </g>
+  <g transform="translate(150, 442)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">TV</text>
+  </g>
 </svg>

@@ -1,8 +1,14 @@
 import * as core from "./core.js";
 
 class Context {
-  constructor({ parent = null, locals = new Map(), inLoop = false }) {
-    Object.assign(this, { parent, locals, inLoop });
+  constructor({
+    parent = null,
+    locals = new Map(),
+    inLoop = false,
+    layoutSize = null,
+    placedEntities = [],
+  }) {
+    Object.assign(this, { parent, locals, inLoop, layoutSize, placedEntities });
   }
   add(name, entity) {
     this.locals.set(name, entity);
@@ -80,6 +86,150 @@ export default function analyze(match) {
       `Cannot assign a ${e.type.description} to a ${type.description}`,
       at,
     );
+  }
+
+  function mustBeWithinBounds(point, at, thicknessNode = null) {
+    const size = context.layoutSize;
+    if (!size) return;
+    const [x, y] = point;
+    const [w, h] = size;
+
+    const getValue = (node) => {
+      if (!node) return null;
+      if (node.kind === "IntLiteral" || node.kind === "FloatLiteral")
+        return Number(node.value);
+      if (node.kind === "UnaryExpression" && node.op === "-") {
+        const v = getValue(node.operand);
+        return v !== null ? -v : null;
+      }
+      return null;
+    };
+
+    const xv = getValue(x);
+    const yv = getValue(y);
+    const wv = getValue(w);
+    const hv = getValue(h);
+    const tv = getValue(thicknessNode) ?? 0;
+    const radius = tv / 2;
+
+    if (xv !== null && wv !== null) {
+      must(
+        xv - radius >= 0 && xv + radius <= wv,
+        `X coordinate ${xv} (with radius ${radius}) out of layout bounds [0, ${wv}]`,
+        at,
+      );
+    }
+    if (yv !== null && hv !== null) {
+      must(
+        yv - radius >= 0 && yv + radius <= hv,
+        `Y coordinate ${yv} (with radius ${radius}) out of layout bounds [0, ${hv}]`,
+        at,
+      );
+    }
+  }
+
+  function mustNotOverlap(entity, at) {
+    const getValue = (node) => {
+      if (!node) return null;
+      if (node.kind === "IntLiteral" || node.kind === "FloatLiteral")
+        return Number(node.value);
+      if (node.kind === "UnaryExpression" && node.op === "-") {
+        const v = getValue(node.operand);
+        return v !== null ? -v : null;
+      }
+      return null;
+    };
+
+    const getBounds = (e) => {
+      if (e.kind === "Wall") {
+        const x1 = getValue(e.from[0]);
+        const y1 = getValue(e.from[1]);
+        const x2 = getValue(e.to[0]);
+        const y2 = getValue(e.to[1]);
+        const t = getValue(e.props?.thickness) ?? 8;
+        if (x1 === null || y1 === null || x2 === null || y2 === null)
+          return null;
+        const r = t / 2;
+        return {
+          minX: Math.min(x1, x2) - r,
+          maxX: Math.max(x1, x2) + r,
+          minY: Math.min(y1, y2) - r,
+          maxY: Math.max(y1, y2) + r,
+        };
+      } else if (e.kind === "Furniture") {
+        const x = getValue(e.at[0]);
+        const y = getValue(e.at[1]);
+        const s = getValue(e.props?.size ?? e.props?.width) ?? 40;
+        if (x === null || y === null) return null;
+        const r = s / 2;
+        return { minX: x - r, maxX: x + r, minY: y - r, maxY: y + r };
+      }
+      return null;
+    };
+
+    const newBounds = getBounds(entity);
+    if (!newBounds) return;
+
+    for (const existing of context.placedEntities) {
+      // Rule: Walls can overlap with other walls (for corner joins)
+      if (entity.kind === "Wall" && existing.kind === "Wall") continue;
+
+      // Rule: Furniture can overlap with other furniture
+      if (entity.kind === "Furniture" && existing.kind === "Furniture")
+        continue;
+
+      // Integrated Exception: Sinks, Pillars, etc. can overlap with walls/counters
+      const integrated = [
+        "sink",
+        "faucet",
+        "art",
+        "node",
+        "dot",
+        "pillar",
+        "post",
+        "section",
+        "tv",
+        "bench",
+      ];
+      const isIntegrated = (e) => {
+        const typeStr = String(
+          typeof e.type === "string" ? e.type : e.type.name,
+        ).toLowerCase();
+        return integrated.some((t) => typeStr.includes(t));
+      };
+
+      if (entity.kind === "Furniture" && isIntegrated(entity)) continue;
+      if (existing.kind === "Furniture" && isIntegrated(existing)) continue;
+
+      const existingBounds = getBounds(existing);
+      if (!existingBounds) continue;
+
+      const overlap = !(
+        newBounds.maxX <= existingBounds.minX ||
+        newBounds.minX >= existingBounds.maxX ||
+        newBounds.maxY <= existingBounds.minY ||
+        newBounds.minY >= existingBounds.maxY
+      );
+
+      if (overlap) {
+        const name1 =
+          entity.name ||
+          (typeof entity.type === "string" ? entity.type : entity.type.name) ||
+          "Object";
+        const name2 =
+          existing.name ||
+          (typeof existing.type === "string"
+            ? existing.type
+            : existing.type.name) ||
+          "Object";
+        must(
+          false,
+          `Spatial collision detected: '${name1}' overlaps with wall '${name2}'`,
+          at,
+        );
+      }
+    }
+    context.placedEntities.push(entity);
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
@@ -185,8 +335,12 @@ export default function analyze(match) {
     LayoutDecl(_layout, idNode, _size, point, block) {
       const name = idNode.sourceString.replace(/"/g, "");
       const layoutEntity = core.layout(name);
-      context = context.newChildContext({ inLoop: false });
       const size = point.rep();
+      context = context.newChildContext({
+        inLoop: false,
+        layoutSize: size,
+        placedEntities: [],
+      });
       const body = block.rep();
       context = context.parent;
       layoutEntity.size = size;
@@ -198,7 +352,11 @@ export default function analyze(match) {
       const component = core.component(id.sourceString);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, component);
-      context = context.newChildContext({ inLoop: false });
+      context = context.newChildContext({
+        inLoop: false,
+        layoutSize: null,
+        placedEntities: [],
+      });
       component.params = params.asIteration().children.map((p) => p.rep());
       component.body = block.rep();
       context = context.parent;
@@ -215,12 +373,30 @@ export default function analyze(match) {
     WallStmt(_wall, id, _from, p1, _to, p2, props, _semi) {
       const from = p1.rep();
       const to = p2.rep();
-      return core.wall(id.sourceString, from, to, props.rep()[0] ?? {});
+      const properties = props.rep()[0] ?? {};
+      const thickness = properties.thickness;
+      mustBeWithinBounds(from, { at: p1 }, thickness);
+      mustBeWithinBounds(to, { at: p2 }, thickness);
+      const wall = core.wall(id.sourceString, from, to, properties);
+      mustNotOverlap(wall, { at: id });
+      return wall;
     },
 
     PlaceStmt(_place, id, _at, p, props, _semi) {
       const at = p.rep();
-      return core.furniture(id.sourceString, at, props.rep()[0] ?? {});
+      const properties = props.rep()[0] ?? {};
+      const size = properties.size ?? properties.width ?? core.intLiteral(40n);
+      mustBeWithinBounds(at, { at: p }, size);
+
+      const entity = context.lookup(id.sourceString);
+      const type =
+        entity?.kind === "Variable" && entity.type === core.stringType
+          ? entity
+          : id.sourceString;
+
+      const furniture = core.furniture(type, at, properties);
+      mustNotOverlap(furniture, { at: id });
+      return furniture;
     },
 
     Type_array(_open, type, _close) {

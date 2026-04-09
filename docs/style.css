@@ -167,10 +167,14 @@ section { padding: 120px 0; border-top: 1px solid var(--border); }
 /* Examples */
 .ex-card {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    grid-template-columns: 1fr;
+    gap: 30px;
     margin-bottom: 120px;
     align-items: flex-start;
+}
+
+.ex-info {
+    max-width: 800px;
 }
 
 .ex-code-container {
@@ -192,14 +196,19 @@ pre {
 .ex-visual {
     background: var(--bg-alt);
     border-radius: 8px;
-    padding: 40px;
+    padding: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
-    aspect-ratio: 1 / 1;
+    min-height: 500px;
 }
 
-.ex-visual img { width: 100%; height: auto; filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.05)); }
+.ex-visual img { 
+    width: 100%; 
+    max-width: 1000px;
+    height: auto; 
+    filter: drop-shadow(10px 10px 20px rgba(0,0,0,0.1)); 
+}
 
 /* Bio */
 .author-bio h3 { font-size: 4rem; margin-bottom: 1rem; color: var(--accent); }

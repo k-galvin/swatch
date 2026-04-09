@@ -47,7 +47,7 @@ describe("The Compiler", () => {
     const result = compile(sample, "svg");
     // Basic verification of SVG structure
     assert.ok(result.includes("<svg"));
-    assert.ok(result.includes("Designer: Test"));
+    assert.ok(result.includes("DESIGNER: Test"));
     assert.ok(result.includes("</svg>"));
   });
 

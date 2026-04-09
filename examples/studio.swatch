@@ -9,25 +9,28 @@ component ModularSofa(x: float, y: float, pieces: float) {
   }
 }
 
-Layout "Modern Studio" size [800, 600] {
+Layout "Modern Studio" size [500, 450] {
   // Perimeter Shell
-  Wall North from [50, 50] to [750, 50] [thickness: 12];
-  Wall East from [750, 50] to [750, 550] [thickness: 12];
-  Wall South from [50, 550] to [750, 550] [thickness: 12];
-  Wall West from [50, 50] to [50, 550] [thickness: 12];
-
-  // Sleeping Zone
-  place KingBed at [150, 150] [color: #f1c40f];
-  Wall Screen from [280, 50] to [280, 250] [color: STEEL, thickness: 5];
-
-  // Work Area
-  place L_Desk at [650, 150] [color: STEEL];
-  place ProChair at [600, 150] [color: #2c3e50];
-
-  // Generative Seating
-  ModularSofa(300.0, 400.0, 3.0);
+  Wall North from [20, 20] to [480, 20] [thickness: 10];
+  Wall East from [480, 20] to [480, 430] [thickness: 10];
   
-  // Media Unit (well within the new 600 height)
-  Wall MediaBench from [300, 520] to [500, 520] [color: #333333, thickness: 15];
-  place TV at [400, 520] [color: #000000, screenSize: 55];
+  // South Wall with gap for the door
+  Wall SouthLeft from [20, 430] to [380, 430] [thickness: 10];
+  Wall SouthRight from [450, 430] to [480, 430] [thickness: 10];
+  Wall West from [20, 20] to [20, 430] [thickness: 10];
+
+  // Kitchenette (Top Right)
+  Wall Counter from [350, 40] to [350, 150] [color: STEEL, thickness: 30];
+  place Sink at [350, 85] [color: #3498db, width: 20];
+  place Fridge at [420, 50] [color: #ecf0f1];
+
+  // Sleeping Zone (Top Left)
+  place Bed at [100, 100] [color: #f1c40f, width: 80];
+
+  // Generative Seating (Bottom)
+  ModularSofa(100.0, 300.0, 3.0);
+  
+  // Media Area
+  Wall MediaBench from [100, 410] to [200, 410] [color: #333333, thickness: 12];
+  place TV at [150, 410] [color: #000000];
 }

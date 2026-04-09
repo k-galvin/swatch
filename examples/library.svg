@@ -1,37 +1,183 @@
-<svg id="Great Library_1" width="1200" height="1000" viewBox="0 0 1200 1000" xmlns="http://www.w3.org/2000/svg">
-  
-  <text x="10" y="20" font-family="Arial" font-size="12" fill="#999">Designer: The Architect | Date: 2026-03-18</text>
-  <rect width="100%" height="100%" fill="#fcfcfc" />
-  <line x1="50" y1="50" x2="50" y2="950" stroke="black" stroke-width="20" stroke-linecap="round" />
-  <line x1="50" y1="50" x2="1150" y2="50" stroke="black" stroke-width="20" stroke-linecap="round" />
-  <line x1="1150" y1="50" x2="1150" y2="950" stroke="black" stroke-width="20" stroke-linecap="round" />
-  <line x1="150" y1="200" x2="700" y2="200" stroke="#7e5233" stroke-width="30" stroke-linecap="round" />
-  <line x1="150" y1="450" x2="700" y2="450" stroke="#7e5233" stroke-width="30" stroke-linecap="round" />
-  <line x1="150" y1="700" x2="700" y2="700" stroke="#7e5233" stroke-width="30" stroke-linecap="round" />
-  <rect x="885" y="185" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="900" y="205" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="885" y="225" width="30" height="30" fill="#333333" rx="4" />
-  <text x="900" y="245" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="885" y="435" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="900" y="455" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="885" y="475" width="30" height="30" fill="#333333" rx="4" />
-  <text x="900" y="495" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="885" y="685" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="900" y="705" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="885" y="725" width="30" height="30" fill="#333333" rx="4" />
-  <text x="900" y="745" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="1035" y="185" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="1050" y="205" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="1035" y="225" width="30" height="30" fill="#333333" rx="4" />
-  <text x="1050" y="245" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="1035" y="435" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="1050" y="455" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="1035" y="475" width="30" height="30" fill="#333333" rx="4" />
-  <text x="1050" y="495" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="1035" y="685" width="30" height="30" fill="#27ae60" rx="4" />
-  <text x="1050" y="705" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Table</text>
-  <rect x="1035" y="725" width="30" height="30" fill="#333333" rx="4" />
-  <text x="1050" y="745" font-family="Arial" font-size="8" text-anchor="middle" fill="white">Chair</text>
-  <rect x="385" y="785" width="30" height="30" fill="#e67e22" rx="4" />
-  <text x="400" y="805" font-family="Arial" font-size="8" text-anchor="middle" fill="white">CircularDesk</text>
+<svg id="Grand Library_1" width="1200" height="1040" viewBox="0 0 1200 1040" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+      <circle cx="0" cy="0" r="1.5" fill="#e0e0e0" />
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="2" result="offsetblur" />
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="white" />
+  <rect width="100%" height="1000" fill="url(#grid)" />
+  <rect x="0" y="1000" width="100%" height="40" fill="#f9f9f9" />
+  <line x1="0" y1="1000" x2="1200" y2="1000" stroke="#eee" stroke-width="1" />
+  <text x="15" y="1025" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#888">
+    DESIGNER: Chief Librarian | DATE: 2026-03-18 | Grand Library_1
+  </text>
+  <line x1="30" y1="30" x2="1170" y2="30" stroke="#2c3e50" stroke-width="20" stroke-linecap="round" />
+  <line x1="30" y1="30" x2="1170" y2="30" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3" />
+  <line x1="1170" y1="30" x2="1170" y2="970" stroke="#2c3e50" stroke-width="20" stroke-linecap="round" />
+  <line x1="1170" y1="30" x2="1170" y2="970" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3" />
+  <line x1="30" y1="970" x2="500" y2="970" stroke="#2c3e50" stroke-width="20" stroke-linecap="round" />
+  <line x1="30" y1="970" x2="500" y2="970" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3" />
+  <line x1="700" y1="970" x2="1170" y2="970" stroke="#2c3e50" stroke-width="20" stroke-linecap="round" />
+  <line x1="700" y1="970" x2="1170" y2="970" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3" />
+  <line x1="30" y1="30" x2="30" y2="970" stroke="#2c3e50" stroke-width="20" stroke-linecap="round" />
+  <line x1="30" y1="30" x2="30" y2="970" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="150" x2="300" y2="150" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="150" x2="300" y2="150" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="270" x2="300" y2="270" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="270" x2="300" y2="270" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="390" x2="300" y2="390" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="390" x2="300" y2="390" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="510" x2="300" y2="510" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="510" x2="300" y2="510" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="630" x2="300" y2="630" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="630" x2="300" y2="630" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="100" y1="750" x2="300" y2="750" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="100" y1="750" x2="300" y2="750" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="150" x2="600" y2="150" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="150" x2="600" y2="150" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="270" x2="600" y2="270" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="270" x2="600" y2="270" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="390" x2="600" y2="390" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="390" x2="600" y2="390" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="510" x2="600" y2="510" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="510" x2="600" y2="510" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="630" x2="600" y2="630" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="630" x2="600" y2="630" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="750" x2="600" y2="750" stroke="#7e5233" stroke-width="25" stroke-linecap="round" />
+  <line x1="400" y1="750" x2="600" y2="750" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.3" />
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="870" y="120" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="900" cy="205" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="870" y="300" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="900" cy="385" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="870" y="480" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="900" cy="565" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="870" y="660" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="900" cy="745" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="1050" y="120" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="1080" cy="205" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="1050" y="300" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="1080" cy="385" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="1050" y="480" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="1080" cy="565" r="20" fill="#333333" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="1050" y="660" width="60" height="60" fill="#27ae60" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="1080" cy="745" r="20" fill="#333333" />
+  </g>
+  <line x1="500" y1="850" x2="700" y2="850" stroke="#7e5233" stroke-width="40" stroke-linecap="round" />
+  <line x1="500" y1="850" x2="700" y2="850" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.3" />
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="580" y="880" width="40" height="40" fill="#ecf0f1" rx="2" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <circle cx="600" cy="950" r="20" fill="#333333" />
+  </g>
+  <g transform="translate(900, 192)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(900, 237)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(900, 372)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(900, 417)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(900, 552)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(900, 597)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(900, 732)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(900, 777)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(1080, 192)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(1080, 237)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(1080, 372)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(1080, 417)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(1080, 552)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(1080, 597)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(1080, 732)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Table</text>
+  </g>
+  <g transform="translate(1080, 777)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
+  <g transform="translate(600, 932)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Librarian</text>
+  </g>
+  <g transform="translate(600, 982)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Chair</text>
+  </g>
 </svg>

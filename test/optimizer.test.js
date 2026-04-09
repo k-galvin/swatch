@@ -228,12 +228,16 @@ describe("The Optimizer", () => {
   });
 
   it("optimizes component bodies", () => {
-    const c = core.component("C", [], [
-      core.assignment(
-        core.variable("x", true, core.intType),
-        binary("+", core.intLiteral(1n), core.intLiteral(1n)),
-      ),
-    ]);
+    const c = core.component(
+      "C",
+      [],
+      [
+        core.assignment(
+          core.variable("x", true, core.intType),
+          binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+        ),
+      ],
+    );
     const optimized = optimize(c);
     assert.strictEqual(optimized.body[0].source.value, 2);
   });
