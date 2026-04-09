@@ -47,6 +47,18 @@ const semanticChecks = [
     "unary minus on variable in bounds check",
     "Layout L size [100, 100] { let x = 10; place Chair at [-x, 50]; }",
   ],
+  [
+    "integrated furniture with variable type",
+    "Layout L size [100, 100] { let sinkVar = \"Table\"; Wall w from [0, 50] to [100, 50]; place sinkVar at [50, 50]; }",
+  ],
+  [
+    "place over integrated",
+    "Layout L size [100, 100] { place Sink at [50, 50]; Wall w from [0, 50] to [100, 50]; }",
+  ],
+  [
+    "various integrated types",
+    "Layout L size [1000, 1000] { place Faucet at [100, 100]; place TV at [200, 200]; place Node at [300, 300]; place Bench at [400, 400]; place Dot at [500, 500]; place Pillar at [600, 600]; place Post at [700, 700]; place Section at [800, 800]; }",
+  ],
 ];
 
 const semanticErrors = [
@@ -89,6 +101,26 @@ const semanticErrors = [
     "negative coordinate out of bounds",
     "Layout L size [100, 100] { place Chair at [-10, 50]; }",
     /X coordinate -10 \(with radius 20\) out of layout bounds/,
+  ],
+  [
+    "furniture-wall collision",
+    "Layout L size [100, 100] { Wall w from [0, 50] to [100, 50]; place Chair at [50, 50]; }",
+    /Spatial collision: 'Chair' overlaps with 'w'/,
+  ],
+  [
+    "furniture-wall collision with variable type",
+    "Layout L size [100, 100] { let t = \"Chair\"; Wall w from [0, 50] to [100, 50]; place t at [50, 50]; }",
+    /Spatial collision: 't' overlaps with 'w'/,
+  ],
+  [
+    "wall-furniture collision",
+    "Layout L size [100, 100] { place Chair at [50, 50]; Wall w from [0, 50] to [100, 50]; }",
+    /Spatial collision: 'w' overlaps with 'Chair'/,
+  ],
+  [
+    "wall-furniture collision with variable type",
+    "Layout L size [100, 100] { let t = \"Chair\"; place t at [50, 50]; Wall w from [0, 50] to [100, 50]; }",
+    /Spatial collision: 'w' overlaps with 't'/,
   ],
 ];
 
