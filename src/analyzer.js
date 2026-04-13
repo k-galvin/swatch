@@ -1,5 +1,9 @@
 import * as core from "./core.js";
 
+/**
+ * The Context class manages lexical scopes and spatial state during semantic analysis.
+ * It tracks parent scopes, local variable bindings, loop nesting, and layout constraints.
+ */
 class Context {
   constructor({
     parent = null,
@@ -10,25 +14,40 @@ class Context {
   }) {
     Object.assign(this, { parent, locals, inLoop, layoutSize, placedEntities });
   }
+
+  /** Binds a name to an entity in the current local scope. */
   add(name, entity) {
     this.locals.set(name, entity);
   }
+
+  /** Recursively searches for a name starting from the current scope. */
   lookup(name) {
     return this.locals.get(name) || this.parent?.lookup(name);
   }
+
+  /** Creates the initial global context populated with the standard library. */
   static root() {
     return new Context({
       locals: new Map(Object.entries(core.standardLibrary)),
     });
   }
+
+  /** Creates a nested scope inheriting properties from the current context. */
   newChildContext(props) {
     return new Context({ ...this, ...props, parent: this, locals: new Map() });
   }
 }
 
+/**
+ * Performs semantic analysis on a match result from the parser.
+ * This phase checks types, scope, and spatial constraints, producing an AST.
+ */
 export default function analyze(match) {
   let context = Context.root();
 
+  /**
+   * Primary validation gate. Throws a formatted error if the condition is false.
+   */
   function must(condition, message, errorLocation) {
     if (!condition) {
       const prefix = errorLocation.at.source.getLineAndColumnMessage();
@@ -36,16 +55,20 @@ export default function analyze(match) {
     }
   }
 
+  /** Extracts a numeric constant value from an AST node if possible. */
   function getValue(node) {
     if (!node) return null;
-    if (node.kind === "IntLiteral" || node.kind === "FloatLiteral")
+    if (node.kind === "IntLiteral" || node.kind === "FloatLiteral") {
       return Number(node.value);
+    }
     if (node.kind === "UnaryExpression" && node.op === "-") {
-      const v = getValue(node.operand);
-      return v !== null ? -v : null;
+      const operandValue = getValue(node.operand);
+      return operandValue !== null ? -operandValue : null;
     }
     return null;
   }
+
+  // --- Static Check Helpers ---
 
   function mustNotAlreadyBeDeclared(name, at) {
     must(!context.locals.has(name), `Identifier ${name} already declared`, at);
@@ -55,104 +78,120 @@ export default function analyze(match) {
     must(entity, `Identifier ${name} not declared`, at);
   }
 
-  function equivalent(t1, t2) {
+  /** Checks for structural or nominal type equality. */
+  function equivalent(type1, type2) {
     return (
-      t1 === t2 ||
-      (t1?.kind === t2?.kind &&
-        (t1.kind !== "ArrayType" || equivalent(t1.baseType, t2.baseType)) &&
-        (t1.kind !== "OptionalType" || equivalent(t1.baseType, t2.baseType)))
+      type1 === type2 ||
+      (type1?.kind === type2?.kind &&
+        (type1.kind !== "ArrayType" ||
+          equivalent(type1.baseType, type2.baseType)) &&
+        (type1.kind !== "OptionalType" ||
+          equivalent(type1.baseType, type2.baseType)))
     );
   }
 
-  function assignable(from, to) {
+  /** Checks if a value of one type can be assigned to a target type. */
+  function assignable(fromType, toType) {
     return (
-      equivalent(from, to) ||
-      (from === core.intType && to === core.floatType) ||
-      to === core.anyType ||
-      (to.kind === "OptionalType" && assignable(from, to.baseType))
+      equivalent(fromType, toType) ||
+      (fromType === core.intType && toType === core.floatType) ||
+      toType === core.anyType ||
+      (toType.kind === "OptionalType" && assignable(fromType, toType.baseType))
     );
   }
 
-  function mustHaveNumericType(e, at) {
-    must(assignable(e.type, core.floatType), "Expected a number", at);
+  function mustHaveNumericType(entity, at) {
+    must(assignable(entity.type, core.floatType), "Expected a number", at);
   }
 
-  function mustHaveBooleanType(e, at) {
-    must(equivalent(e.type, core.booleanType), "Expected a boolean", at);
+  function mustHaveBooleanType(entity, at) {
+    must(equivalent(entity.type, core.booleanType), "Expected a boolean", at);
   }
 
-  function mustBothHaveTheSameType(e1, e2, at) {
+  function mustBothHaveTheSameType(entity1, entity2, at) {
     must(
-      equivalent(e1.type, e2.type) ||
-        (assignable(e1.type, core.floatType) &&
-          assignable(e2.type, core.floatType)),
+      equivalent(entity1.type, entity2.type) ||
+        (assignable(entity1.type, core.floatType) &&
+          assignable(entity2.type, core.floatType)),
       "Operands do not have the same type",
       at,
     );
   }
 
-  function mustBeAssignable(e, { toType: type }, at) {
+  function mustBeAssignable(entity, { toType }, at) {
     must(
-      assignable(e.type, type),
-      `Cannot assign a ${e.type.description} to a ${type.description}`,
+      assignable(entity.type, toType),
+      `Cannot assign a ${entity.type.description} to a ${toType.description}`,
       at,
     );
   }
 
+  /** Validates that a point is within the current layout's dimensions. */
   function mustBeWithinBounds(point, at, thicknessNode = null) {
-    const size = context.layoutSize;
-    if (!size) return;
+    const layoutSize = context.layoutSize;
+    if (!layoutSize) return;
     const [x, y] = point;
-    const [w, h] = size;
+    const [width, height] = layoutSize;
 
-    const xv = getValue(x);
-    const yv = getValue(y);
-    const wv = getValue(w);
-    const hv = getValue(h);
-    const tv = getValue(thicknessNode) ?? 0;
-    const radius = tv / 2;
+    const xVal = getValue(x);
+    const yVal = getValue(y);
+    const widthVal = getValue(width);
+    const heightVal = getValue(height);
+    const thicknessVal = getValue(thicknessNode) ?? 0;
+    const radius = thicknessVal / 2;
 
-    if (xv !== null && wv !== null) {
+    if (xVal !== null && widthVal !== null) {
       must(
-        xv - radius >= 0 && xv + radius <= wv,
-        `X coordinate ${xv} (with radius ${radius}) out of layout bounds [0, ${wv}]`,
+        xVal - radius >= 0 && xVal + radius <= widthVal,
+        `X coordinate ${xVal} (with radius ${radius}) out of layout bounds [0, ${widthVal}]`,
         at,
       );
     }
-    if (yv !== null && hv !== null) {
+    if (yVal !== null && heightVal !== null) {
       must(
-        yv - radius >= 0 && yv + radius <= hv,
-        `Y coordinate ${yv} (with radius ${radius}) out of layout bounds [0, ${hv}]`,
+        yVal - radius >= 0 && yVal + radius <= heightVal,
+        `Y coordinate ${yVal} (with radius ${radius}) out of layout bounds [0, ${heightVal}]`,
         at,
       );
     }
   }
 
+  /**
+   * Spatial Collision Check.
+   * Ensures that walls and furniture do not overlap, with exemptions for
+   * "integrated" items like sinks or pillars.
+   */
   function mustNotOverlap(entity, at) {
     const getBounds = (e) => {
       if (e.kind === "Wall") {
         const [x1, y1] = [getValue(e.from[0]), getValue(e.from[1])];
         const [x2, y2] = [getValue(e.to[0]), getValue(e.to[1])];
-        if (x1 === null || y1 === null || x2 === null || y2 === null)
+        if (x1 === null || y1 === null || x2 === null || y2 === null) {
           return null;
-        const r = (getValue(e.props?.thickness) ?? 8) / 2;
+        }
+        const radius = (getValue(e.props?.thickness) ?? 8) / 2;
         return {
-          minX: Math.min(x1, x2) - r,
-          maxX: Math.max(x1, x2) + r,
-          minY: Math.min(y1, y2) - r,
-          maxY: Math.max(y1, y2) + r,
+          minX: Math.min(x1, x2) - radius,
+          maxX: Math.max(x1, x2) + radius,
+          minY: Math.min(y1, y2) - radius,
+          maxY: Math.max(y1, y2) + radius,
         };
       }
       const [x, y] = [getValue(e.at[0]), getValue(e.at[1])];
       if (x === null || y === null) return null;
-      const r = (getValue(e.props?.size ?? e.props?.width) ?? 40) / 2;
-      return { minX: x - r, maxX: x + r, minY: y - r, maxY: y + r };
+      const radius = (getValue(e.props?.size ?? e.props?.width) ?? 40) / 2;
+      return {
+        minX: x - radius,
+        maxX: x + radius,
+        minY: y - radius,
+        maxY: y + radius,
+      };
     };
 
     const newBounds = getBounds(entity);
     if (!newBounds) return;
 
-    const integrated = [
+    const INTEGRATED_ARCHETYPES = [
       "sink",
       "faucet",
       "art",
@@ -164,13 +203,11 @@ export default function analyze(match) {
       "tv",
       "bench",
     ];
+
     const isIntegrated = (e) => {
-      const t = e.type;
-      const name = (typeof t === "string" ? t : t.name).toLowerCase();
-      for (const k of integrated) {
-        if (name.includes(k)) return true;
-      }
-      return false;
+      const type = e.type;
+      const name = (typeof type === "string" ? type : type.name).toLowerCase();
+      return INTEGRATED_ARCHETYPES.some((keyword) => name.includes(keyword));
     };
 
     if (entity.kind === "Furniture" && isIntegrated(entity)) {
@@ -179,9 +216,12 @@ export default function analyze(match) {
     }
 
     for (const existing of context.placedEntities) {
+      // Walls can cross other walls; Furniture can cross furniture.
+      // Collisions are flagged between Wall <-> Furniture.
       if (entity.kind === "Wall" && existing.kind === "Wall") continue;
-      if (entity.kind === "Furniture" && existing.kind === "Furniture")
+      if (entity.kind === "Furniture" && existing.kind === "Furniture") {
         continue;
+      }
       if (existing.kind === "Furniture" && isIntegrated(existing)) continue;
 
       const eb = getBounds(existing);
@@ -206,14 +246,15 @@ export default function analyze(match) {
     }
     context.placedEntities.push(entity);
   }
+
+  // --- Semantics Construction ---
+
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
     Program(metadata, stmts) {
       return core.program(metadata.rep()[0] ?? null, stmts.rep());
     },
 
     Metadata(_designer, authorNode, _date, dateNode) {
-      _designer.rep();
-      _date.rep();
       return {
         author: authorNode.rep().value,
         date: dateNode.rep().value,
@@ -263,25 +304,25 @@ export default function analyze(match) {
     },
 
     Statement_if(_if, test, consequent, _else, alternate) {
-      const t = test.rep();
-      mustHaveBooleanType(t, { at: test });
+      const testExp = test.rep();
+      mustHaveBooleanType(testExp, { at: test });
       context = context.newChildContext();
-      const c = consequent.rep();
+      const consequentBlock = consequent.rep();
       context = context.parent;
       context = context.newChildContext();
       const alt = alternate.rep()[0] ?? [];
-      const a = Array.isArray(alt) ? alt : [alt];
+      const alternateBlock = Array.isArray(alt) ? alt : [alt];
       context = context.parent;
-      return core.ifStatement(t, c, a);
+      return core.ifStatement(testExp, consequentBlock, alternateBlock);
     },
 
     Statement_while(_while, test, block) {
-      const t = test.rep();
-      mustHaveBooleanType(t, { at: test });
+      const testExp = test.rep();
+      mustHaveBooleanType(testExp, { at: test });
       context = context.newChildContext({ inLoop: true });
       const body = block.rep();
       context = context.parent;
-      return core.whileStatement(t, body);
+      return core.whileStatement(testExp, body);
     },
 
     Statement_repeat(_repeat, exp, block) {
@@ -294,16 +335,22 @@ export default function analyze(match) {
     },
 
     Statement_range(_for, idNode, _in, low, op, high, block) {
-      const [l, h] = [low.rep(), high.rep()];
-      mustHaveNumericType(l, { at: low });
-      mustHaveNumericType(h, { at: high });
+      const [lowExp, highExp] = [low.rep(), high.rep()];
+      mustHaveNumericType(lowExp, { at: low });
+      mustHaveNumericType(highExp, { at: high });
       const name = idNode.rep();
       const iterator = core.variable(name, false, core.floatType);
       context = context.newChildContext({ inLoop: true });
       context.add(name, iterator);
       const body = block.rep();
       context = context.parent;
-      return core.forRangeStatement(iterator, l, op.sourceString, h, body);
+      return core.forRangeStatement(
+        iterator,
+        lowExp,
+        op.sourceString,
+        highExp,
+        body,
+      );
     },
 
     Statement_collection(_for, idNode, _in, collectionNode, block) {
@@ -331,8 +378,8 @@ export default function analyze(match) {
       const initializer = exp.rep();
       const specifiedType = type.rep()[0] ?? initializer.type;
       mustBeAssignable(initializer, { toType: specifiedType }, { at: exp });
-      const mutable = modifier.sourceString === "let";
-      const variable = core.variable(id.sourceString, mutable, specifiedType);
+      const isMutable = modifier.sourceString === "let";
+      const variable = core.variable(id.sourceString, isMutable, specifiedType);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
@@ -341,191 +388,191 @@ export default function analyze(match) {
     LayoutDecl(_layout, idNode, _size, point, block) {
       const name = idNode.sourceString.replace(/"/g, "");
       const layoutEntity = core.layout(name);
-      const size = point.rep();
+      const layoutSize = point.rep();
       context = context.newChildContext({
         inLoop: false,
-        layoutSize: size,
+        layoutSize,
         placedEntities: [],
       });
       const body = block.rep();
       context = context.parent;
-      layoutEntity.size = size;
+      layoutEntity.size = layoutSize;
       layoutEntity.body = body;
       return layoutEntity;
     },
 
     ComponentDecl(_comp, id, _open, params, _close, block) {
-      const component = core.component(id.sourceString);
+      const componentEntity = core.component(id.sourceString);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
-      context.add(id.sourceString, component);
+      context.add(id.sourceString, componentEntity);
       context = context.newChildContext({
         inLoop: false,
         layoutSize: null,
         placedEntities: [],
       });
-      component.params = params.asIteration().children.map((p) => p.rep());
-      component.body = block.rep();
+      componentEntity.params = params.asIteration().children.map((p) => p.rep());
+      componentEntity.body = block.rep();
       context = context.parent;
-      return component;
+      return componentEntity;
     },
 
     Param(id, _colon, type) {
-      const param = core.variable(id.sourceString, false, type.rep());
-      mustNotAlreadyBeDeclared(param.name, { at: id });
-      context.add(param.name, param);
-      return param;
+      const paramEntity = core.variable(id.sourceString, false, type.rep());
+      mustNotAlreadyBeDeclared(paramEntity.name, { at: id });
+      context.add(paramEntity.name, paramEntity);
+      return paramEntity;
     },
 
     WallStmt(_wall, id, _from, p1, _to, p2, props, _semi) {
-      const from = p1.rep();
-      const to = p2.rep();
+      const startPoint = p1.rep();
+      const endPoint = p2.rep();
       const properties = props.rep()[0] ?? {};
       const thickness = properties.thickness;
-      mustBeWithinBounds(from, { at: p1 }, thickness);
-      mustBeWithinBounds(to, { at: p2 }, thickness);
-      const wall = core.wall(id.sourceString, from, to, properties);
-      mustNotOverlap(wall, { at: id });
-      return wall;
+      mustBeWithinBounds(startPoint, { at: p1 }, thickness);
+      mustBeWithinBounds(endPoint, { at: p2 }, thickness);
+      const wallEntity = core.wall(id.sourceString, startPoint, endPoint, properties);
+      mustNotOverlap(wallEntity, { at: id });
+      return wallEntity;
     },
 
     PlaceStmt(_place, id, _at, p, props, _semi) {
-      const at = p.rep();
+      const placementPoint = p.rep();
       const properties = props.rep()[0] ?? {};
-      const size = properties.size ?? properties.width ?? core.intLiteral(40n);
-      mustBeWithinBounds(at, { at: p }, size);
+      const placementSize = properties.size ?? properties.width ?? core.intLiteral(40n);
+      mustBeWithinBounds(placementPoint, { at: p }, placementSize);
 
       const entity = context.lookup(id.sourceString);
-      const type =
+      const furnitureType =
         entity?.kind === "Variable" && entity.type === core.stringType
           ? entity
           : id.sourceString;
 
-      const furniture = core.furniture(type, at, properties);
-      mustNotOverlap(furniture, { at: id });
-      return furniture;
+      const furnitureEntity = core.furniture(furnitureType, placementPoint, properties);
+      mustNotOverlap(furnitureEntity, { at: id });
+      return furnitureEntity;
     },
 
-    Type_array(_open, type, _close) {
-      return core.arrayType(type.rep());
+    Type_array(_open, innerType, _close) {
+      return core.arrayType(innerType.rep());
     },
-    Type_optional(type, _q) {
-      return core.optionalType(type.rep());
+    Type_optional(innerType, _question) {
+      return core.optionalType(innerType.rep());
     },
-    Type_id(id) {
-      const t = context.lookup(id.sourceString);
-      mustHaveBeenFound(t, id.sourceString, { at: id });
-      return t;
+    Type_id(idNode) {
+      const typeEntity = context.lookup(idNode.sourceString);
+      mustHaveBeenFound(typeEntity, idNode.sourceString, { at: idNode });
+      return typeEntity;
     },
 
-    Point(_open, e1, _comma, e2, _close) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustHaveNumericType(v1, { at: e1 });
-      mustHaveNumericType(v2, { at: e2 });
-      return [v1, v2];
+    Point(_open, xExpNode, _comma, yExpNode, _close) {
+      const [xExp, yExp] = [xExpNode.rep(), yExpNode.rep()];
+      mustHaveNumericType(xExp, { at: xExpNode });
+      mustHaveNumericType(yExp, { at: yExpNode });
+      return [xExp, yExp];
     },
-    Props(_open, list, _close) {
+    Props(_open, propList, _close) {
       return Object.fromEntries(
-        list.asIteration().children.map((c) => c.rep()),
+        propList.asIteration().children.map((prop) => prop.rep()),
       );
     },
-    Prop(id, _colon, exp) {
-      return [id.sourceString, exp.rep()];
+    Prop(idNode, _colon, expNode) {
+      return [idNode.sourceString, expNode.rep()];
     },
 
     Exp_conditional(test, _q, e1, _colon, e2) {
-      const t = test.rep();
-      mustHaveBooleanType(t, { at: test });
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustBothHaveTheSameType(v1, v2, { at: e1 });
-      return core.conditional(t, v1, v2, v1.type);
+      const testExp = test.rep();
+      mustHaveBooleanType(testExp, { at: test });
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      mustBothHaveTheSameType(val1, val2, { at: e1 });
+      return core.conditional(testExp, val1, val2, val1.type);
     },
 
     Exp1_coalesce(e1, _op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
+      const [val1, val2] = [e1.rep(), e2.rep()];
       must(
-        v1.type.kind === "OptionalType",
+        val1.type.kind === "OptionalType",
         "Coalesce operator requires an optional left operand",
         { at: e1 },
       );
       must(
-        assignable(v2.type, v1.type.baseType),
-        `Cannot coalesce a ${v1.type.description} with a ${v2.type.description}`,
+        assignable(val2.type, val1.type.baseType),
+        `Cannot coalesce a ${val1.type.description} with a ${val2.type.description}`,
         { at: e2 },
       );
-      return core.binary("??", v1, v2, v1.type.baseType);
+      return core.binary("??", val1, val2, val1.type.baseType);
     },
 
     Exp2_or(e1, _op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustHaveBooleanType(v1, { at: e1 });
-      mustHaveBooleanType(v2, { at: e2 });
-      return core.binary("||", v1, v2, core.booleanType);
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      mustHaveBooleanType(val1, { at: e1 });
+      mustHaveBooleanType(val2, { at: e2 });
+      return core.binary("||", val1, val2, core.booleanType);
     },
 
     Exp3_and(e1, _op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustHaveBooleanType(v1, { at: e1 });
-      mustHaveBooleanType(v2, { at: e2 });
-      return core.binary("&&", v1, v2, core.booleanType);
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      mustHaveBooleanType(val1, { at: e1 });
+      mustHaveBooleanType(val2, { at: e2 });
+      return core.binary("&&", val1, val2, core.booleanType);
     },
 
-    Exp4_compare(e1, op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      if (op.sourceString === "in") {
+    Exp4_compare(e1, opNode, e2) {
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      if (opNode.sourceString === "in") {
         must(
-          v2.type.kind === "ArrayType",
+          val2.type.kind === "ArrayType",
           "The 'in' operator requires an array on the right side",
           { at: e2 },
         );
         must(
-          assignable(v1.type, v2.type.baseType),
-          `Cannot check if a ${v1.type.description} is in a ${v2.type.description}`,
+          assignable(val1.type, val2.type.baseType),
+          `Cannot check if a ${val1.type.description} is in a ${val2.type.description}`,
           { at: e1 },
         );
       } else {
-        mustBothHaveTheSameType(v1, v2, { at: op });
+        mustBothHaveTheSameType(val1, val2, { at: opNode });
       }
-      return core.binary(op.sourceString, v1, v2, core.booleanType);
+      return core.binary(opNode.sourceString, val1, val2, core.booleanType);
     },
 
-    Exp5_add(e1, op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      if (v1.type === core.stringType || v2.type === core.stringType) {
-        return core.binary("+", v1, v2, core.stringType);
+    Exp5_add(e1, opNode, e2) {
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      if (val1.type === core.stringType || val2.type === core.stringType) {
+        return core.binary("+", val1, val2, core.stringType);
       }
-      mustHaveNumericType(v1, { at: e1 });
-      mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.sourceString, v1, v2, v1.type);
+      mustHaveNumericType(val1, { at: e1 });
+      mustBothHaveTheSameType(val1, val2, { at: opNode });
+      return core.binary(opNode.sourceString, val1, val2, val1.type);
     },
 
-    Exp6_multiply(e1, op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustHaveNumericType(v1, { at: e1 });
-      mustBothHaveTheSameType(v1, v2, { at: op });
-      return core.binary(op.sourceString, v1, v2, v1.type);
+    Exp6_multiply(e1, opNode, e2) {
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      mustHaveNumericType(val1, { at: e1 });
+      mustBothHaveTheSameType(val1, val2, { at: opNode });
+      return core.binary(opNode.sourceString, val1, val2, val1.type);
     },
 
     Exp7_power(e1, _op, e2) {
-      const [v1, v2] = [e1.rep(), e2.rep()];
-      mustHaveNumericType(v1, { at: e1 });
-      mustBothHaveTheSameType(v1, v2, { at: e1 });
-      return core.binary("**", v1, v2, v1.type);
+      const [val1, val2] = [e1.rep(), e2.rep()];
+      mustHaveNumericType(val1, { at: e1 });
+      mustBothHaveTheSameType(val1, val2, { at: e1 });
+      return core.binary("**", val1, val2, val1.type);
     },
 
-    Exp8_unary(op, e1) {
-      const v = e1.rep();
-      if (op.sourceString === "-") mustHaveNumericType(v, { at: e1 });
-      if (op.sourceString === "!") mustHaveBooleanType(v, { at: e1 });
-      return core.unary(op.sourceString, v, v.type);
+    Exp8_unary(opNode, e1) {
+      const val = e1.rep();
+      if (opNode.sourceString === "-") mustHaveNumericType(val, { at: e1 });
+      if (opNode.sourceString === "!") mustHaveBooleanType(val, { at: e1 });
+      return core.unary(opNode.sourceString, val, val.type);
     },
 
-    Exp9_hash(_hash, e) {
-      const val = e.rep();
+    Exp9_hash(_hash, expNode) {
+      const val = expNode.rep();
       return core.unary("#", val, core.intType);
     },
 
-    Exp9_random(_random, e) {
-      const val = e.rep();
+    Exp9_random(_random, expNode) {
+      const val = expNode.rep();
       return core.unary("random", val, val.type.baseType);
     },
 
@@ -534,12 +581,12 @@ export default function analyze(match) {
     },
     Exp10_array(_open, elements, _close) {
       return core.arrayLiteral(
-        elements.asIteration().children.map((e) => e.rep()),
+        elements.asIteration().children.map((element) => element.rep()),
       );
     },
     Exp10_call(calleeNode, _open, args, _close) {
       const callee = calleeNode.rep();
-      const parsedArgs = args.asIteration().children.map((a) => a.rep());
+      const parsedArgs = args.asIteration().children.map((arg) => arg.rep());
       if (callee.kind === "Component") {
         must(
           parsedArgs.length === callee.params.length,
@@ -554,16 +601,16 @@ export default function analyze(match) {
           ),
         );
       }
-      const type = callee.kind === "Component" ? core.voidType : callee.type;
-      return core.call(callee, parsedArgs, type);
+      const callType = callee.kind === "Component" ? core.voidType : callee.type;
+      return core.call(callee, parsedArgs, callType);
     },
     Exp10_id(idNode) {
       const entity = context.lookup(idNode.sourceString);
       mustHaveBeenFound(entity, idNode.sourceString, { at: idNode });
       return entity;
     },
-    Exp10_parens(_open, e, _close) {
-      return e.rep();
+    Exp10_parens(_open, expNode, _close) {
+      return expNode.rep();
     },
     true(_) {
       return core.booleanLiteral(true);
@@ -585,13 +632,10 @@ export default function analyze(match) {
     },
 
     _iter(...children) {
-      return children.map((c) => c.rep());
-    },
-    _terminal() {
-      return this.sourceString;
+      return children.map((child) => child.rep());
     },
     Block(_open, stmts, _close) {
-      return stmts.children.map((s) => s.rep());
+      return stmts.children.map((stmt) => stmt.rep());
     },
   });
 

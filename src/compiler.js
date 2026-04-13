@@ -1,10 +1,26 @@
+/**
+ * Swatch Compiler Orchestrator
+ *
+ * This module coordinates the four phases of the Swatch compiler:
+ * 1. Parsing (Ohm)
+ * 2. Semantic Analysis (Static Checking)
+ * 3. Optimization (AST Transformations)
+ * 4. Code Generation (SVG)
+ */
+
 import parse from "./parser.js";
 import analyze from "./analyzer.js";
 import optimize from "./optimizer.js";
 import generate from "./generator.js";
 
+/**
+ * Compiles Swatch source code into the requested output format.
+ * @param {string} source The raw script content.
+ * @param {string} outputType The desired target ('parsed', 'analyzed', 'optimized', 'svg').
+ * @returns {string|object} The resulting compiler artifact.
+ * @throws {Error} If any phase of compilation fails.
+ */
 export default function compile(source, outputType) {
-  // 1. Validation of output target
   const allowedTypes = ["parsed", "analyzed", "optimized", "svg"];
   if (!allowedTypes.includes(outputType)) {
     throw new Error(
@@ -12,21 +28,18 @@ export default function compile(source, outputType) {
     );
   }
 
-  // 2. Parsing Phase
+  // Phase 1: Syntactic Analysis
   const match = parse(source);
   if (outputType === "parsed") return "Syntax is ok";
 
-  // 3. Semantic Analysis Phase
-  // This turns the Ohm Match into a decorated AST.
+  // Phase 2: Semantic Analysis
   const analyzed = analyze(match);
   if (outputType === "analyzed") return analyzed;
 
-  // 4. Optimization Phase
-  // Performs constant folding and dead code elimination.
+  // Phase 3: Optimization
   const optimized = optimize(analyzed);
   if (outputType === "optimized") return optimized;
 
-  // 5. Code Generation Phase
-  // Final transformation into the SVG blueprint.
+  // Phase 4: Code Generation
   return generate(optimized);
 }

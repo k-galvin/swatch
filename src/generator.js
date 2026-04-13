@@ -1,14 +1,28 @@
+/**
+ * Swatch SVG Code Generator
+ *
+ * This phase transforms the optimized AST into Scalable Vector Graphics (SVG).
+ * It handles scope management for variables, executes drawing commands,
+ * and applies architectural styling (grids, shadows, line-caps).
+ *
+ * @param {object} program The root Program node.
+ * @returns {string} The final SVG markup.
+ */
 export default function generate(program) {
   const svgLines = [];
   let nextId = 1;
 
+  /** Generates a unique target name for SVG elements. */
   function getTargetName(base) {
     return `${base}_${nextId++}`;
   }
 
+  /**
+   * Recursively evaluates an expression to a concrete JavaScript value.
+   * Resolves variables against the provided execution context.
+   */
   function evaluate(node, context) {
-    if (node === null) return null;
-    if (node === undefined) return null;
+    if (node === null || node === undefined) return null;
     if (typeof node === "bigint") return Number(node);
     if (typeof node !== "object") return node;
 
@@ -17,143 +31,157 @@ export default function generate(program) {
         return context.has(node)
           ? evaluate(context.get(node), context)
           : evaluate(node.value, context);
+
       case "BinaryExpression": {
-        const l = evaluate(node.left, context);
-        const r = evaluate(node.right, context);
+        const leftVal = evaluate(node.left, context);
+        const rightVal = evaluate(node.right, context);
+
+        // Special case: String concatenation
         if (node.op === "+") {
-          return typeof l === "string" || typeof r === "string"
-            ? String(l) + String(r)
-            : Number(l) + Number(r);
+          return typeof leftVal === "string" || typeof rightVal === "string"
+            ? String(leftVal) + String(rightVal)
+            : Number(leftVal) + Number(rightVal);
         }
-        const nl = Number(l);
-        const nr = Number(r);
+
+        const leftNum = Number(leftVal);
+        const rightNum = Number(rightVal);
+
         switch (node.op) {
-          case "-":
-            return nl - nr;
-          case "*":
-            return nl * nr;
-          case "/":
-            return nl / nr;
-          case "**":
-            return Math.pow(nl, nr);
-          case "<":
-            return nl < nr;
-          case "==":
-            return nl === nr;
-          case "&&":
-            return nl && nr;
-          case "||":
-            return nl || nr;
-          case "??":
-            return l ?? r;
-          case "in":
-            return Array.isArray(r) ? r.includes(l) : false;
-          case "%":
-            return nl % nr;
-          default:
-            return 0;
+          case "-": return leftNum - rightNum;
+          case "*": return leftNum * rightNum;
+          case "/": return leftNum / rightNum;
+          case "**": return Math.pow(leftNum, rightNum);
+          case "<": return leftNum < rightNum;
+          case "==": return leftNum === rightNum;
+          case "&&": return leftNum && rightNum;
+          case "||": return leftNum || rightNum;
+          case "??": return leftVal ?? rightVal;
+          case "in": return Array.isArray(rightVal) ? rightVal.includes(leftVal) : false;
+          case "%": return leftNum % rightNum;
+          default: return 0;
         }
       }
+
       case "UnaryExpression": {
-        const v = evaluate(node.operand, context);
-        return node.op === "-" ? -Number(v) : !v;
+        const operandVal = evaluate(node.operand, context);
+        return node.op === "-" ? -Number(operandVal) : !operandVal;
       }
+
       case "Conditional":
         return evaluate(node.test, context)
           ? evaluate(node.consequent, context)
           : evaluate(node.alternate, context);
+
       case "IntLiteral":
       case "FloatLiteral":
         return Number(node.value);
+
       case "StringLiteral":
       case "BooleanLiteral":
       case "ColorLiteral":
         return node.value;
+
       case "ArrayLiteral":
-        return node.elements.map((e) => evaluate(e, context));
+        return node.elements.map((element) => evaluate(element, context));
     }
     return node;
   }
 
-  function execute(stmts, context, labelQueue = null) {
-    const statements = Array.isArray(stmts) ? stmts : [stmts];
-    for (const stmt of statements) {
-      if (!stmt) continue;
-      if (stmt.kind === "BreakStatement") return "BREAK";
-      switch (stmt.kind) {
+  /**
+   * Executes a sequence of statements, updating the context or appending to svgLines.
+   * Handles loop control signals (e.g., "BREAK").
+   */
+  function execute(statementsInput, context, labelQueue = null) {
+    const statements = Array.isArray(statementsInput) ? statementsInput : [statementsInput];
+
+    for (const statement of statements) {
+      if (!statement) continue;
+      if (statement.kind === "BreakStatement") return "BREAK";
+
+      switch (statement.kind) {
         case "VariableDeclaration":
-          context.set(stmt.variable, evaluate(stmt.initializer, context));
+          context.set(statement.variable, evaluate(statement.initializer, context));
           break;
+
         case "Assignment":
-          context.set(stmt.target, evaluate(stmt.source, context));
+          context.set(statement.target, evaluate(statement.source, context));
           break;
+
         case "BumpStatement": {
-          const v = Number(evaluate(stmt.variable, context));
-          context.set(stmt.variable, stmt.op === "++" ? v + 1 : v - 1);
+          const currentVal = Number(evaluate(statement.variable, context));
+          context.set(statement.variable, statement.op === "++" ? currentVal + 1 : currentVal - 1);
           break;
         }
+
         case "IfStatement": {
           const result = execute(
-            evaluate(stmt.test, context) ? stmt.consequent : stmt.alternate,
+            evaluate(statement.test, context) ? statement.consequent : statement.alternate,
             context,
             labelQueue,
           );
           if (result === "BREAK") return "BREAK";
           break;
         }
+
         case "WhileStatement": {
-          while (evaluate(stmt.test, context)) {
-            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+          while (evaluate(statement.test, context)) {
+            if (execute(statement.body, context, labelQueue) === "BREAK") break;
           }
           break;
         }
+
         case "RepeatStatement": {
-          const count = Number(evaluate(stmt.count, context));
+          const count = Number(evaluate(statement.count, context));
           for (let i = 0; i < count; i++) {
-            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+            if (execute(statement.body, context, labelQueue) === "BREAK") break;
           }
           break;
         }
+
         case "ForRangeStatement": {
-          const low = Number(evaluate(stmt.low, context));
-          const high = Number(evaluate(stmt.high, context));
-          for (let i = low; stmt.op === "..." ? i <= high : i < high; i++) {
-            context.set(stmt.iterator, i);
-            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+          const low = Number(evaluate(statement.low, context));
+          const high = Number(evaluate(statement.high, context));
+          for (let i = low; statement.op === "..." ? i <= high : i < high; i++) {
+            context.set(statement.iterator, i);
+            if (execute(statement.body, context, labelQueue) === "BREAK") break;
           }
           break;
         }
+
         case "ForCollectionStatement": {
-          const collection = evaluate(stmt.collection, context);
+          const collection = evaluate(statement.collection, context);
           for (const item of collection) {
-            context.set(stmt.iterator, item);
-            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+            context.set(statement.iterator, item);
+            if (execute(statement.body, context, labelQueue) === "BREAK") break;
           }
           break;
         }
+
         case "Call": {
-          const callee = stmt.callee;
+          const callee = statement.callee;
           const callContext = new Map(context);
           callee.params.forEach((param, i) => {
-            callContext.set(param, evaluate(stmt.args[i], context));
+            callContext.set(param, evaluate(statement.args[i], context));
           });
           execute(callee.body, callContext, labelQueue);
           break;
         }
+
         case "Layout": {
           const layoutContext = new Map(context);
           const currentLabels = [];
-          const [w, h] = stmt.size.map((s) =>
-            Number(evaluate(s, layoutContext)),
+          const [width, height] = statement.size.map((dimension) =>
+            Number(evaluate(dimension, layoutContext)),
           );
           const footerHeight = program.metadata ? 40 : 0;
-          const totalHeight = h + footerHeight;
-          const layoutId = getTargetName(stmt.name || "Layout");
+          const totalHeight = height + footerHeight;
+          const layoutId = getTargetName(statement.name || "Layout");
 
           svgLines.push(
-            `<svg id="${layoutId}" width="${w}" height="${totalHeight}" viewBox="0 0 ${w} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">`,
+            `<svg id="${layoutId}" width="${width}" height="${totalHeight}" viewBox="0 0 ${width} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">`,
           );
 
+          // Standard Architectural Background & Grid
           svgLines.push(`  <defs>`);
           svgLines.push(
             `    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">`,
@@ -183,18 +211,19 @@ export default function generate(program) {
 
           svgLines.push(`  <rect width="100%" height="100%" fill="white" />`);
           svgLines.push(
-            `  <rect width="100%" height="${h}" fill="url(#grid)" />`,
+            `  <rect width="100%" height="${height}" fill="url(#grid)" />`,
           );
 
+          // Optional Metadata Footer
           if (program.metadata) {
             svgLines.push(
-              `  <rect x="0" y="${h}" width="100%" height="${footerHeight}" fill="#f9f9f9" />`,
+              `  <rect x="0" y="${height}" width="100%" height="${footerHeight}" fill="#f9f9f9" />`,
             );
             svgLines.push(
-              `  <line x1="0" y1="${h}" x2="${w}" y2="${h}" stroke="#eee" stroke-width="1" />`,
+              `  <line x1="0" y1="${height}" x2="${width}" y2="${height}" stroke="#eee" stroke-width="1" />`,
             );
             svgLines.push(
-              `  <text x="15" y="${h + 25}" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#888">`,
+              `  <text x="15" y="${height + 25}" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#888">`,
             );
             svgLines.push(
               `    DESIGNER: ${program.metadata.author} | DATE: ${program.metadata.date} | ${layoutId}`,
@@ -202,15 +231,14 @@ export default function generate(program) {
             svgLines.push(`  </text>`);
           }
 
-          execute(stmt.body, layoutContext, currentLabels);
+          execute(statement.body, layoutContext, currentLabels);
 
-          // Flush Label Queue (Anti-collision and Z-order)
+          // Flush Label Queue (Vertical stacking collision avoidance)
           const occupied = [];
           for (const label of currentLabels) {
-            let { cx, cy, text } = label;
+            const { cx, cy, text } = label;
             let finalY = cy;
 
-            // Basic vertical stacking collision avoidance
             while (
               occupied.some(
                 (box) =>
@@ -235,77 +263,58 @@ export default function generate(program) {
           svgLines.push(`</svg>`);
           break;
         }
-        case "Wall": {
-          const x1 = Number(evaluate(stmt.from[0], context));
-          const y1 = Number(evaluate(stmt.from[1], context));
-          const x2 = Number(evaluate(stmt.to[0], context));
-          const y2 = Number(evaluate(stmt.to[1], context));
-          const color = evaluate(stmt.props?.color, context) ?? "#2c3e50";
-          const thickness = Number(
-            evaluate(stmt.props?.thickness, context) ?? 8,
-          );
 
-          // Architectural double-line wall effect with round caps for clean joins
+        case "Wall": {
+          const startX = Number(evaluate(statement.from[0], context));
+          const startY = Number(evaluate(statement.from[1], context));
+          const endX = Number(evaluate(statement.to[0], context));
+          const endY = Number(evaluate(statement.to[1], context));
+          const color = evaluate(statement.props?.color, context) ?? "#2c3e50";
+          const thickness = Number(evaluate(statement.props?.thickness, context) ?? 8);
+
+          // Architectural double-line wall effect
           svgLines.push(
-            `  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${thickness}" stroke-linecap="round" />`,
+            `  <line x1="${startX}" y1="${startY}" x2="${endX}" y2="${endY}" stroke="${color}" stroke-width="${thickness}" stroke-linecap="round" />`,
           );
           svgLines.push(
-            `  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="white" stroke-width="${thickness * 0.4}" stroke-linecap="round" opacity="0.3" />`,
+            `  <line x1="${startX}" y1="${startY}" x2="${endX}" y2="${endY}" stroke="white" stroke-width="${thickness * 0.4}" stroke-linecap="round" opacity="0.3" />`,
           );
           break;
         }
-        case "Furniture": {
-          const cx = Number(evaluate(stmt.at[0], context));
-          const cy = Number(evaluate(stmt.at[1], context));
 
-          // Geometry Pass
-          const color = evaluate(stmt.props?.color, context) ?? "#3498db";
-          const typeValue = String(evaluate(stmt.type, context));
-          const labelText = evaluate(stmt.props?.label, context) ?? typeValue;
-          const size = Number(
-            evaluate(stmt.props?.size, context) ??
-              evaluate(stmt.props?.width, context) ??
+        case "Furniture": {
+          const centerX = Number(evaluate(statement.at[0], context));
+          const centerY = Number(evaluate(statement.at[1], context));
+          const color = evaluate(statement.props?.color, context) ?? "#3498db";
+          const typeValue = String(evaluate(statement.type, context));
+          const labelText = evaluate(statement.props?.label, context) ?? typeValue;
+          const dimension = Number(
+            evaluate(statement.props?.size, context) ??
+              evaluate(statement.props?.width, context) ??
               40,
           );
-          const half = size / 2;
+          const half = dimension / 2;
 
           svgLines.push(`  <g class="furniture" filter="url(#shadow)">`);
-          const lowerType = typeValue.toLowerCase();
-          if (lowerType.includes("chair") || lowerType.includes("stool")) {
-            svgLines.push(
-              `    <circle cx="${cx}" cy="${cy}" r="${half}" fill="${color}" />`,
-            );
-          } else if (
-            lowerType.includes("table") ||
-            lowerType.includes("desk")
-          ) {
-            svgLines.push(
-              `    <rect x="${cx - half}" y="${cy - half}" width="${size}" height="${size}" fill="${color}" rx="2" />`,
-            );
-          } else if (lowerType.includes("bed")) {
-            svgLines.push(
-              `    <rect x="${cx - size * 0.75}" y="${cy - half}" width="${size * 1.5}" height="${size}" fill="${color}" rx="4" />`,
-            );
-            svgLines.push(
-              `    <rect x="${cx - size * 0.75 + 5}" y="${cy - half + 5}" width="20" height="${size - 10}" fill="white" opacity="0.2" rx="2" />`,
-            );
-          } else if (lowerType.includes("sink")) {
-            svgLines.push(
-              `    <rect x="${cx - half}" y="${cy - half}" width="${size}" height="${size}" fill="${color}" rx="4" />`,
-            );
-            svgLines.push(
-              `    <circle cx="${cx}" cy="${cy}" r="${half * 0.7}" fill="white" opacity="0.2" />`,
-            );
+          const archetype = typeValue.toLowerCase();
+          
+          if (archetype.includes("chair") || archetype.includes("stool")) {
+            svgLines.push(`    <circle cx="${centerX}" cy="${centerY}" r="${half}" fill="${color}" />`);
+          } else if (archetype.includes("table") || archetype.includes("desk")) {
+            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="2" />`);
+          } else if (archetype.includes("bed")) {
+            svgLines.push(`    <rect x="${centerX - dimension * 0.75}" y="${centerY - half}" width="${dimension * 1.5}" height="${dimension}" fill="${color}" rx="4" />`);
+            svgLines.push(`    <rect x="${centerX - dimension * 0.75 + 5}" y="${centerY - half + 5}" width="20" height="${dimension - 10}" fill="white" opacity="0.2" rx="2" />`);
+          } else if (archetype.includes("sink")) {
+            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="4" />`);
+            svgLines.push(`    <circle cx="${centerX}" cy="${centerY}" r="${half * 0.7}" fill="white" opacity="0.2" />`);
           } else {
-            svgLines.push(
-              `    <rect x="${cx - half}" y="${cy - half}" width="${size}" height="${size}" fill="${color}" rx="6" />`,
-            );
+            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="6" />`);
           }
           svgLines.push(`  </g>`);
 
-          // Queue Label Pass
           if (labelQueue) {
-            labelQueue.push({ cx, cy: cy + half + 12, text: labelText });
+            labelQueue.push({ cx: centerX, cy: centerY + half + 12, text: labelText });
           }
           break;
         }
