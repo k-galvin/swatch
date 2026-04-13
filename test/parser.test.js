@@ -13,6 +13,7 @@ const syntaxChecks = [
   ["logical expressions", "let b = true || false && !true;"],
   ["comparisons", "let c = 5 < 10 == true;"],
   ["conditional expression", "let d = x > 5 ? 1 : 0;"],
+  ["coalesce expression", "let e = x ?? 5;"],
   [
     "repeat loop",
     "Layout L size [100, 100] { repeat 5 { place Chair at [0, 0]; } }",
@@ -21,12 +22,20 @@ const syntaxChecks = [
     "range loop",
     "Layout L size [100, 100] { for i in 1...10 { place Table at [i, i]; } }",
   ],
+  ["while loop", "Layout L size [100, 100] { while x < 10 { x = x + 1; } }"],
+  [
+    "collection loop",
+    "Layout L size [100, 100] { for x in [1, 2, 3] { place Chair at [x, x]; } }",
+  ],
+  ["break statement", "Layout L size [100, 100] { while true { break; } }"],
+  ["in operator", "let b = 1 in [1, 2, 3];"],
   [
     "component declaration",
     "component Window(w: number, h: number) { Wall W from [0,0] to [w,h]; }",
   ],
   ["function call in expressions", "let x = f(1, 2) + g();"],
   ["assignment in layout", "Layout L size [10, 10] { x = x + 1; }"],
+  ["bump statements", "Layout L size [10, 10] { x++; y--; }"],
   ["complex property", 'place Desk at [0, 0] [color: #aabbcc, label: "Work"];'],
   ["hex colors", "let c = #abc; let d = #112233;"],
   ["comments", "// a comment\nLayout L size [0,0] {} // end"],

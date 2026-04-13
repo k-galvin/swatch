@@ -6,6 +6,7 @@ import analyze from "../src/analyzer.js";
 const semanticChecks = [
   ["variables can be printed", "let x = 1; print(x);"],
   ["variables can be reassigned", "let x = 1; x = x + 1;"],
+  ["variables can be bumped", "let x = 1; x++; x--;"],
   [
     "all numeric types are float-compatible",
     "let x = 1; let y = 2.5; let z = x + y;",
@@ -18,6 +19,10 @@ const semanticChecks = [
   ["conditionals work", "if (true) { let x = 1; } else { let x = 2; }"],
   ["loops work", "repeat 5 { let x = 1; }"],
   ["range loops work", "for i in 0 ... 10 { print(i); }"],
+  ["collection loops work", "for x in [1, 2, 3] { print(x); }"],
+  ["in operator works", "let b = 1 in [1, 2, 3];"],
+  ["while loops work", "let x = 0; while x < 10 { x = x + 1; }"],
+  ["break in while loops work", "while true { break; }"],
   ["arrays work", "let a = [1, 2, 3];"],
   ["hex colors work", "let c = #AABBCC;"],
   ["ternary operators work", "let x = true ? 1 : 2;"],
@@ -31,6 +36,7 @@ const semanticChecks = [
   ["array length works", "let x = #[1, 2, 3];"],
   ["random works", "let x = random [1, 2, 3];"],
   ["any type assignment", 'let x: any = 5; x = "hello";'],
+  ["coalesce works", "let x: float? = 1.0; let y = x ?? 2.0;"],
   [
     "string concatenation",
     'let x = "a" + "b"; let y = "a" + 5; let z = 5 + "b";',
@@ -41,6 +47,10 @@ const semanticChecks = [
     "optional type equivalence",
     "let x: float? = 1.0; let y: float? = 2.0; let z = x == y;",
   ],
+  [
+    "array type equivalence",
+    "let x: [float] = [1.0]; let y: [float] = [2.0]; let z = x == y;",
+  ],
   ["component call in expression", "component C() {} let x = C();"],
   ["print call in expression", "let x = print(1);"],
   [
@@ -49,7 +59,7 @@ const semanticChecks = [
   ],
   [
     "integrated furniture with variable type",
-    "Layout L size [100, 100] { let sinkVar = \"Table\"; Wall w from [0, 50] to [100, 50]; place sinkVar at [50, 50]; }",
+    'Layout L size [100, 100] { let sinkVar = "Table"; Wall w from [0, 50] to [100, 50]; place sinkVar at [50, 50]; }',
   ],
   [
     "place over integrated",
@@ -79,10 +89,44 @@ const semanticErrors = [
     /Cannot assign a string to a int/,
   ],
   ["non-boolean if test", "if (1) { }", /Expected a boolean/],
+  ["non-boolean while test", "while (1) { }", /Expected a boolean/],
   ["non-numeric repeat count", 'repeat "5" { }', /Expected a number/],
+  ["bump non-numeric", 'let x = "a"; x++;', /Expected a number/],
+  ["bump constant", "const x = 1; x++;", /Cannot bump a constant/],
+  ["non-array collection loop", "for x in 1 { }", /Expected an array/],
+  [
+    "in operator non-array",
+    "let b = 1 in 2;",
+    /The 'in' operator requires an array/,
+  ],
+  [
+    "in operator type mismatch",
+    'let b = 1 in ["a"];',
+    /Cannot check if a int is in a \[string\]/,
+  ],
+  [
+    "coalesce non-optional",
+    "let x = 1; let y = x ?? 2;",
+    /Coalesce operator requires an optional left operand/,
+  ],
+  [
+    "coalesce type mismatch",
+    'let x: float? = 1.0; let y = x ?? "a";',
+    /Cannot coalesce a float\? with a string/,
+  ],
   [
     "binary operator type mismatch",
     "let x = 1 + true;",
+    /Operands do not have the same type/,
+  ],
+  [
+    "array type mismatch",
+    'let x: [float] = [1.0]; let y: [string] = ["a"]; let z = x == y;',
+    /Operands do not have the same type/,
+  ],
+  [
+    "optional type mismatch",
+    'let x: float? = 1.0; let y: string? = "a"; let z = x == y;',
     /Operands do not have the same type/,
   ],
   ["unary operator type mismatch", "let x = -true;", /Expected a number/],
@@ -109,7 +153,7 @@ const semanticErrors = [
   ],
   [
     "furniture-wall collision with variable type",
-    "Layout L size [100, 100] { let t = \"Chair\"; Wall w from [0, 50] to [100, 50]; place t at [50, 50]; }",
+    'Layout L size [100, 100] { let t = "Chair"; Wall w from [0, 50] to [100, 50]; place t at [50, 50]; }',
     /Spatial collision: 't' overlaps with 'w'/,
   ],
   [
@@ -119,7 +163,7 @@ const semanticErrors = [
   ],
   [
     "wall-furniture collision with variable type",
-    "Layout L size [100, 100] { let t = \"Chair\"; place t at [50, 50]; Wall w from [0, 50] to [100, 50]; }",
+    'Layout L size [100, 100] { let t = "Chair"; place t at [50, 50]; Wall w from [0, 50] to [100, 50]; }',
     /Spatial collision: 'w' overlaps with 't'/,
   ],
 ];

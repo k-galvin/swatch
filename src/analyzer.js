@@ -133,10 +133,15 @@ export default function analyze(match) {
       if (e.kind === "Wall") {
         const [x1, y1] = [getValue(e.from[0]), getValue(e.from[1])];
         const [x2, y2] = [getValue(e.to[0]), getValue(e.to[1])];
-        if (x1 === null || y1 === null || x2 === null || y2 === null) return null;
+        if (x1 === null || y1 === null || x2 === null || y2 === null)
+          return null;
         const r = (getValue(e.props?.thickness) ?? 8) / 2;
-        return { minX: Math.min(x1, x2) - r, maxX: Math.max(x1, x2) + r,
-                 minY: Math.min(y1, y2) - r, maxY: Math.max(y1, y2) + r };
+        return {
+          minX: Math.min(x1, x2) - r,
+          maxX: Math.max(x1, x2) + r,
+          minY: Math.min(y1, y2) - r,
+          maxY: Math.max(y1, y2) + r,
+        };
       }
       const [x, y] = [getValue(e.at[0]), getValue(e.at[1])];
       if (x === null || y === null) return null;
@@ -147,7 +152,18 @@ export default function analyze(match) {
     const newBounds = getBounds(entity);
     if (!newBounds) return;
 
-    const integrated = ["sink", "faucet", "art", "node", "dot", "pillar", "post", "section", "tv", "bench"];
+    const integrated = [
+      "sink",
+      "faucet",
+      "art",
+      "node",
+      "dot",
+      "pillar",
+      "post",
+      "section",
+      "tv",
+      "bench",
+    ];
     const isIntegrated = (e) => {
       const t = e.type;
       const name = (typeof t === "string" ? t : t.name).toLowerCase();
@@ -164,14 +180,27 @@ export default function analyze(match) {
 
     for (const existing of context.placedEntities) {
       if (entity.kind === "Wall" && existing.kind === "Wall") continue;
-      if (entity.kind === "Furniture" && existing.kind === "Furniture") continue;
+      if (entity.kind === "Furniture" && existing.kind === "Furniture")
+        continue;
       if (existing.kind === "Furniture" && isIntegrated(existing)) continue;
 
       const eb = getBounds(existing);
-      if (!(newBounds.maxX <= eb.minX || newBounds.minX >= eb.maxX ||
-            newBounds.maxY <= eb.minY || newBounds.minY >= eb.maxY)) {
-        const n1 = entity.name || (typeof entity.type === "string" ? entity.type : entity.type.name);
-        const n2 = existing.name || (typeof existing.type === "string" ? existing.type : existing.type.name);
+      if (
+        !(
+          newBounds.maxX <= eb.minX ||
+          newBounds.minX >= eb.maxX ||
+          newBounds.maxY <= eb.minY ||
+          newBounds.minY >= eb.maxY
+        )
+      ) {
+        const n1 =
+          entity.name ||
+          (typeof entity.type === "string" ? entity.type : entity.type.name);
+        const n2 =
+          existing.name ||
+          (typeof existing.type === "string"
+            ? existing.type
+            : existing.type.name);
         must(false, `Spatial collision: '${n1}' overlaps with '${n2}'`, at);
       }
     }
@@ -201,6 +230,13 @@ export default function analyze(match) {
       must(target.mutable, "Cannot assign to a constant", { at: idNode });
       mustBeAssignable(source, { toType: target.type }, { at: exp });
       return core.assignment(target, source);
+    },
+
+    Statement_bump(exp, op, _semi) {
+      const variable = exp.rep();
+      mustHaveNumericType(variable, { at: exp });
+      must(variable.mutable, "Cannot bump a constant", { at: exp });
+      return core.bumpStatement(variable, op.sourceString);
     },
 
     Statement_call(idNode, _open, args, _close, _semi) {
@@ -239,6 +275,15 @@ export default function analyze(match) {
       return core.ifStatement(t, c, a);
     },
 
+    Statement_while(_while, test, block) {
+      const t = test.rep();
+      mustHaveBooleanType(t, { at: test });
+      context = context.newChildContext({ inLoop: true });
+      const body = block.rep();
+      context = context.parent;
+      return core.whileStatement(t, body);
+    },
+
     Statement_repeat(_repeat, exp, block) {
       const count = exp.rep();
       mustHaveNumericType(count, { at: exp });
@@ -259,6 +304,22 @@ export default function analyze(match) {
       const body = block.rep();
       context = context.parent;
       return core.forRangeStatement(iterator, l, op.sourceString, h, body);
+    },
+
+    Statement_collection(_for, idNode, _in, collectionNode, block) {
+      const collection = collectionNode.rep();
+      must(
+        collection.type.kind === "ArrayType",
+        "Expected an array for the collection loop",
+        { at: collectionNode },
+      );
+      const name = idNode.rep();
+      const iterator = core.variable(name, false, collection.type.baseType);
+      context = context.newChildContext({ inLoop: true });
+      context.add(name, iterator);
+      const body = block.rep();
+      context = context.parent;
+      return core.forCollectionStatement(iterator, collection, body);
     },
 
     Statement_break(_break, _semi) {
@@ -379,27 +440,55 @@ export default function analyze(match) {
       return core.conditional(t, v1, v2, v1.type);
     },
 
-    Exp1_or(e1, _op, e2) {
+    Exp1_coalesce(e1, _op, e2) {
+      const [v1, v2] = [e1.rep(), e2.rep()];
+      must(
+        v1.type.kind === "OptionalType",
+        "Coalesce operator requires an optional left operand",
+        { at: e1 },
+      );
+      must(
+        assignable(v2.type, v1.type.baseType),
+        `Cannot coalesce a ${v1.type.description} with a ${v2.type.description}`,
+        { at: e2 },
+      );
+      return core.binary("??", v1, v2, v1.type.baseType);
+    },
+
+    Exp2_or(e1, _op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveBooleanType(v1, { at: e1 });
       mustHaveBooleanType(v2, { at: e2 });
       return core.binary("||", v1, v2, core.booleanType);
     },
 
-    Exp2_and(e1, _op, e2) {
+    Exp3_and(e1, _op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveBooleanType(v1, { at: e1 });
       mustHaveBooleanType(v2, { at: e2 });
       return core.binary("&&", v1, v2, core.booleanType);
     },
 
-    Exp3_compare(e1, op, e2) {
+    Exp4_compare(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
-      mustBothHaveTheSameType(v1, v2, { at: op });
+      if (op.sourceString === "in") {
+        must(
+          v2.type.kind === "ArrayType",
+          "The 'in' operator requires an array on the right side",
+          { at: e2 },
+        );
+        must(
+          assignable(v1.type, v2.type.baseType),
+          `Cannot check if a ${v1.type.description} is in a ${v2.type.description}`,
+          { at: e1 },
+        );
+      } else {
+        mustBothHaveTheSameType(v1, v2, { at: op });
+      }
       return core.binary(op.sourceString, v1, v2, core.booleanType);
     },
 
-    Exp4_add(e1, op, e2) {
+    Exp5_add(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       if (v1.type === core.stringType || v2.type === core.stringType) {
         return core.binary("+", v1, v2, core.stringType);
@@ -409,46 +498,46 @@ export default function analyze(match) {
       return core.binary(op.sourceString, v1, v2, v1.type);
     },
 
-    Exp5_multiply(e1, op, e2) {
+    Exp6_multiply(e1, op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: op });
       return core.binary(op.sourceString, v1, v2, v1.type);
     },
 
-    Exp6_power(e1, _op, e2) {
+    Exp7_power(e1, _op, e2) {
       const [v1, v2] = [e1.rep(), e2.rep()];
       mustHaveNumericType(v1, { at: e1 });
       mustBothHaveTheSameType(v1, v2, { at: e1 });
       return core.binary("**", v1, v2, v1.type);
     },
 
-    Exp7_unary(op, e1) {
+    Exp8_unary(op, e1) {
       const v = e1.rep();
       if (op.sourceString === "-") mustHaveNumericType(v, { at: e1 });
       if (op.sourceString === "!") mustHaveBooleanType(v, { at: e1 });
       return core.unary(op.sourceString, v, v.type);
     },
 
-    Exp8_hash(_hash, e) {
+    Exp9_hash(_hash, e) {
       const val = e.rep();
       return core.unary("#", val, core.intType);
     },
 
-    Exp8_random(_random, e) {
+    Exp9_random(_random, e) {
       const val = e.rep();
       return core.unary("random", val, val.type.baseType);
     },
 
-    Exp9(node) {
+    Exp10(node) {
       return node.rep();
     },
-    Exp9_array(_open, elements, _close) {
+    Exp10_array(_open, elements, _close) {
       return core.arrayLiteral(
         elements.asIteration().children.map((e) => e.rep()),
       );
     },
-    Exp9_call(calleeNode, _open, args, _close) {
+    Exp10_call(calleeNode, _open, args, _close) {
       const callee = calleeNode.rep();
       const parsedArgs = args.asIteration().children.map((a) => a.rep());
       if (callee.kind === "Component") {
@@ -468,12 +557,12 @@ export default function analyze(match) {
       const type = callee.kind === "Component" ? core.voidType : callee.type;
       return core.call(callee, parsedArgs, type);
     },
-    Exp9_id(idNode) {
+    Exp10_id(idNode) {
       const entity = context.lookup(idNode.sourceString);
       mustHaveBeenFound(entity, idNode.sourceString, { at: idNode });
       return entity;
     },
-    Exp9_parens(_open, e, _close) {
+    Exp10_parens(_open, e, _close) {
       return e.rep();
     },
     true(_) {

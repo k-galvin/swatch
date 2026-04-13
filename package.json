@@ -6,7 +6,31 @@
   "main": "src/swatch.js",
   "scripts": {
     "test": "c8 node --test test/**/*.test.js",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
     "build-examples": "for f in examples/*.swatch; do node src/swatch.js \"$f\" svg > \"${f%.swatch}.svg\"; done"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "prettier"
+    ],
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "no-constant-condition": "off"
+    }
   },
   "repository": {
     "type": "git",
@@ -26,6 +50,9 @@
   },
   "devDependencies": {
     "c8": "^11.0.0",
-    "mocha": "^11.0.1"
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "mocha": "^11.0.1",
+    "prettier": "^3.2.5"
   }
 }

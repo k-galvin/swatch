@@ -32,8 +32,16 @@ export function assignment(target, source) {
   return { kind: "Assignment", target, source };
 }
 
+export function bumpStatement(variable, op) {
+  return { kind: "BumpStatement", variable, op };
+}
+
 export function ifStatement(test, consequent, alternate) {
   return { kind: "IfStatement", test, consequent, alternate };
+}
+
+export function whileStatement(test, body) {
+  return { kind: "WhileStatement", test, body };
 }
 
 export function call(callee, args, type = voidType) {
@@ -46,6 +54,10 @@ export function repeatStatement(count, body) {
 
 export function forRangeStatement(iterator, low, op, high, body) {
   return { kind: "ForRangeStatement", iterator, low, op, high, body };
+}
+
+export function forCollectionStatement(iterator, collection, body) {
+  return { kind: "ForCollectionStatement", iterator, collection, body };
 }
 
 export const breakStatement = { kind: "BreakStatement" };

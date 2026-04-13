@@ -91,6 +91,71 @@ const fixtures = [
     expected: [/x2="1" y2="1"/],
   },
   {
+    name: "coalesce operator",
+    source: `
+      Layout "CoalesceTest" size [100, 100] {
+        let x: float? = 50.0;
+        let y = x ?? 10.0;
+        Wall w from [0, 0] to [y, y];
+      }`,
+    expected: [/x2="50" y2="50"/],
+  },
+  {
+    name: "for-in collection loop",
+    source: `
+      Layout "CollectionTest" size [100, 100] {
+        for x in [10.0, 20.0, 30.0] {
+          place Chair at [x, x];
+        }
+      }`,
+    expected: [
+      /(<g class="furniture".*?<circle.*?>.*?){3}/s,
+      /cx="10" cy="10"/,
+      /cx="20" cy="20"/,
+      /cx="30" cy="30"/,
+    ],
+  },
+  {
+    name: "in operator in generator",
+    source: `
+      Layout "InTest" size [100, 100] {
+        let a = [1.0, 2.0, 3.0];
+        if (2.0 in a) {
+          Wall w1 from [0, 0] to [10, 10];
+        }
+        if (!(4.0 in a)) {
+          Wall w2 from [0, 0] to [30, 30];
+        }
+      }`,
+    expected: [/x2="10" y2="10"/, /x2="30" y2="30"/],
+  },
+  {
+    name: "break in collection loop",
+    source: `
+    Layout "CollectionBreak" size [100, 100] {
+      for x in [10.0, 20.0, 30.0] {
+        if (x == 20.0) { break; }
+        place Chair at [x, x];
+      }
+    }`,
+    expected: [
+      /(<g class="furniture".*?<circle.*?>.*?){1}/s,
+      /cx="10" cy="10"/,
+    ],
+  },
+  {
+    name: "bump operators",
+    source: `
+      Layout "BumpTest" size [100, 100] {
+        let x = 10;
+        x++;
+        x++;
+        x--;
+        Wall w from [0, 0] to [x, x];
+      }`,
+    expected: [/x2="11" y2="11"/],
+  },
+  {
     name: "component arithmetic and comparisons",
     source: `
       component Calc(x: float, y: float) {
@@ -125,6 +190,48 @@ const fixtures = [
         else { Wall w2 from [0,0] to [2,2]; }
       }`,
     expected: [/x2="2" y2="2"/],
+  },
+  {
+    name: "while loops and break",
+    source: `
+      Layout "WhileTest" size [100, 100] {
+        let x = 0;
+        while x < 5 {
+          x = x + 1;
+          if (x == 3) { break; }
+          place Chair at [x * 10.0, x * 10.0];
+        }
+      }`,
+    expected: [
+      /(<g class="furniture".*?<circle.*?>.*?){2}/s, // Only 2 chairs (x=1, x=2)
+      /cx="10" cy="10"/,
+      /cx="20" cy="20"/,
+    ],
+  },
+  {
+    name: "break in repeat loop",
+    source: `
+      Layout "RepeatBreakTest" size [100, 100] {
+        repeat 10 {
+          break;
+          place Chair at [50, 50];
+        }
+      }`,
+    expected: [/^(?!.*<g class="furniture").*$/s], // No chairs
+  },
+  {
+    name: "break in for loop",
+    source: `
+      Layout "ForBreakTest" size [100, 100] {
+        for i in 1 ... 10 {
+          if (i == 2) { break; }
+          place Chair at [i * 10.0, i * 10.0];
+        }
+      }`,
+    expected: [
+      /(<g class="furniture".*?<circle.*?>.*?){1}/s, // Only 1 chair (i=1)
+      /cx="10" cy="10"/,
+    ],
   },
 ];
 
@@ -249,6 +356,47 @@ describe("The Generator", () => {
     assert.match(output, /cx="42" cy="42"/);
   });
 
+  it("covers in operator with non-array in evaluate()", () => {
+    const program = core.program(null, [
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(
+            core.variable("x", false, core.booleanType),
+            {
+              kind: "BinaryExpression",
+              op: "in",
+              left: core.intLiteral(1n),
+              right: core.intLiteral(2n), // Not an array
+            },
+          ),
+        ],
+      ),
+    ]);
+    const output = generate(program);
+    assert.ok(output.includes("<svg"));
+  });
+
+  it("covers coalesce with null in evaluate()", () => {
+    const program = core.program(null, [
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(core.variable("x", false, core.floatType), {
+            kind: "BinaryExpression",
+            op: "??",
+            left: null,
+            right: core.intLiteral(42n),
+          }),
+        ],
+      ),
+    ]);
+    const output = generate(program);
+    assert.ok(output.includes("<svg"));
+  });
+
   it("covers non-constant unary and conditional", () => {
     const source = `
       Layout "NonConst" size [100, 100] {
@@ -287,7 +435,7 @@ describe("The Generator", () => {
         [
           core.variableDeclaration(core.variable("x", false, core.floatType), {
             kind: "BinaryExpression",
-            op: "??",
+            op: "!!!",
             left: core.intLiteral(1n),
             right: core.intLiteral(2n),
           }),

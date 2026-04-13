@@ -44,15 +44,20 @@ export default function generate(program) {
             return nl && nr;
           case "||":
             return nl || nr;
+          case "??":
+            return l ?? r;
+          case "in":
+            return Array.isArray(r) ? r.includes(l) : false;
           case "%":
             return nl % nr;
           default:
             return 0;
         }
       }
-      case "UnaryExpression":
+      case "UnaryExpression": {
         const v = evaluate(node.operand, context);
         return node.op === "-" ? -Number(v) : !v;
+      }
       case "Conditional":
         return evaluate(node.test, context)
           ? evaluate(node.consequent, context)
@@ -64,6 +69,8 @@ export default function generate(program) {
       case "BooleanLiteral":
       case "ColorLiteral":
         return node.value;
+      case "ArrayLiteral":
+        return node.elements.map((e) => evaluate(e, context));
     }
     return node;
   }
@@ -72,6 +79,7 @@ export default function generate(program) {
     const statements = Array.isArray(stmts) ? stmts : [stmts];
     for (const stmt of statements) {
       if (!stmt) continue;
+      if (stmt.kind === "BreakStatement") return "BREAK";
       switch (stmt.kind) {
         case "VariableDeclaration":
           context.set(stmt.variable, evaluate(stmt.initializer, context));
@@ -79,17 +87,31 @@ export default function generate(program) {
         case "Assignment":
           context.set(stmt.target, evaluate(stmt.source, context));
           break;
-        case "IfStatement":
-          execute(
+        case "BumpStatement": {
+          const v = Number(evaluate(stmt.variable, context));
+          context.set(stmt.variable, stmt.op === "++" ? v + 1 : v - 1);
+          break;
+        }
+        case "IfStatement": {
+          const result = execute(
             evaluate(stmt.test, context) ? stmt.consequent : stmt.alternate,
             context,
             labelQueue,
           );
+          if (result === "BREAK") return "BREAK";
           break;
+        }
+        case "WhileStatement": {
+          while (evaluate(stmt.test, context)) {
+            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+          }
+          break;
+        }
         case "RepeatStatement": {
           const count = Number(evaluate(stmt.count, context));
-          for (let i = 0; i < count; i++)
-            execute(stmt.body, context, labelQueue);
+          for (let i = 0; i < count; i++) {
+            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+          }
           break;
         }
         case "ForRangeStatement": {
@@ -97,7 +119,15 @@ export default function generate(program) {
           const high = Number(evaluate(stmt.high, context));
           for (let i = low; stmt.op === "..." ? i <= high : i < high; i++) {
             context.set(stmt.iterator, i);
-            execute(stmt.body, context, labelQueue);
+            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
+          }
+          break;
+        }
+        case "ForCollectionStatement": {
+          const collection = evaluate(stmt.collection, context);
+          for (const item of collection) {
+            context.set(stmt.iterator, item);
+            if (execute(stmt.body, context, labelQueue) === "BREAK") break;
           }
           break;
         }

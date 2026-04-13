@@ -33,6 +33,9 @@ export default function optimize(node) {
       node.source = optimize(node.source);
       if (node.target === node.source) return null;
       break;
+    case "BumpStatement":
+      node.variable = optimize(node.variable);
+      break;
     case "IfStatement":
       node.test = optimize(node.test);
       if (node.test.kind === "BooleanLiteral") {
@@ -46,6 +49,12 @@ export default function optimize(node) {
       node.alternate = node.alternate
         .flatMap(optimize)
         .filter((s) => s !== null);
+      break;
+    case "WhileStatement":
+      node.test = optimize(node.test);
+      if (node.test.kind === "BooleanLiteral" && node.test.value === false)
+        return null;
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "RepeatStatement":
       node.count = optimize(node.count);
@@ -62,6 +71,10 @@ export default function optimize(node) {
         node.low.value === node.high.value
       )
         return null;
+      node.body = node.body.flatMap(optimize).filter((s) => s !== null);
+      break;
+    case "ForCollectionStatement":
+      node.collection = optimize(node.collection);
       node.body = node.body.flatMap(optimize).filter((s) => s !== null);
       break;
     case "Conditional":
@@ -100,6 +113,25 @@ export default function optimize(node) {
         if (node.op === "&&") return core.booleanLiteral(l && r);
         if (node.op === "||") return core.booleanLiteral(l || r);
       }
+      if (node.op === "in") {
+        node.left = optimize(node.left);
+        node.right = optimize(node.right);
+        if (
+          node.left.kind &&
+          node.left.kind.includes("Literal") &&
+          node.right.kind === "ArrayLiteral" &&
+          node.right.elements.every((e) => e.kind && e.kind.includes("Literal"))
+        ) {
+          const l = node.left.value;
+          const r = node.right.elements.map((e) => e.value);
+          return core.booleanLiteral(r.includes(l));
+        }
+      }
+      if (node.op === "??") {
+        if (node.left.kind && node.left.kind.includes("Literal")) {
+          return node.left;
+        }
+      }
       break;
     case "UnaryExpression":
       node.operand = optimize(node.operand);
@@ -108,6 +140,9 @@ export default function optimize(node) {
         if (node.op === "-") return core.floatLiteral(-Number(v));
         if (node.op === "!") return core.booleanLiteral(!v);
       }
+      break;
+    case "ArrayLiteral":
+      node.elements = node.elements.map(optimize);
       break;
     case "Call":
       node.args = node.args.map(optimize);

@@ -80,6 +80,13 @@ describe("The Optimizer", () => {
     );
   });
 
+  it("folds constant coalesce", () => {
+    assert.deepEqual(
+      optimize(binary("??", core.floatLiteral(1.0), core.floatLiteral(2.0))),
+      core.floatLiteral(1.0),
+    );
+  });
+
   it("folds constant unary ops", () => {
     assert.deepEqual(
       optimize(unary("-", core.intLiteral(5n))),
@@ -158,6 +165,46 @@ describe("The Optimizer", () => {
     assert.strictEqual(optimized.alternate[0].source.value, 4);
   });
 
+  it("eliminates dead WhileStatements (false test)", () => {
+    const stmt = core.whileStatement(core.booleanLiteral(false), [
+      core.wall("W", [0, 0], [1, 1], {}),
+    ]);
+    assert.strictEqual(optimize(stmt), null);
+  });
+
+  it("handles while true loops", () => {
+    const stmt = core.whileStatement(core.booleanLiteral(true), [
+      core.wall("W", [0, 0], [1, 1], {}),
+    ]);
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.kind, "WhileStatement");
+    assert.strictEqual(optimized.test.value, true);
+  });
+
+  it("optimizes while loop body", () => {
+    const stmt = core.whileStatement(
+      core.variable("x", false, core.booleanType),
+      [
+        core.assignment(
+          core.variable("y", true, core.intType),
+          binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+        ),
+      ],
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.body[0].source.value, 2);
+  });
+
+  it("optimizes while loop body and removes nulls", () => {
+    const x = core.variable("x", true, core.intType);
+    const stmt = core.whileStatement(
+      core.variable("test", false, core.booleanType),
+      [core.assignment(x, x)],
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.body.length, 0);
+  });
+
   it("eliminates dead RepeatStatements", () => {
     const stmt = core.repeatStatement(core.intLiteral(0n), [
       core.wall("W", [0, 0], [1, 1], {}),
@@ -190,6 +237,13 @@ describe("The Optimizer", () => {
     const x = core.variable("x", true, core.intType);
     const stmt = core.assignment(x, x);
     assert.strictEqual(optimize(stmt), null);
+  });
+
+  it("optimizes BumpStatement variable", () => {
+    const x = core.variable("x", true, core.intType);
+    const stmt = core.bumpStatement(x, "++");
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.variable, x);
   });
 
   it("handles unoptimizable expressions", () => {
@@ -285,6 +339,47 @@ describe("The Optimizer", () => {
     );
     const optimized2 = optimize(stmt2);
     assert.strictEqual(optimized2.low.value, 1.0);
+  });
+
+  it("optimizes ForCollectionStatement collection and body", () => {
+    const stmt = core.forCollectionStatement(
+      core.variable("x", false, core.intType),
+      core.arrayLiteral([
+        binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+      ]),
+      [
+        core.assignment(
+          core.variable("y", true, core.intType),
+          binary("+", core.intLiteral(1n), core.intLiteral(1n)),
+        ),
+      ],
+    );
+    const optimized = optimize(stmt);
+    assert.strictEqual(optimized.collection.elements[0].value, 2);
+    assert.strictEqual(optimized.body[0].source.value, 2);
+  });
+
+  it("folds constant in operator", () => {
+    assert.deepEqual(
+      optimize(
+        binary(
+          "in",
+          core.intLiteral(1n),
+          core.arrayLiteral([core.intLiteral(1n), core.intLiteral(2n)]),
+        ),
+      ),
+      core.booleanLiteral(true),
+    );
+    assert.deepEqual(
+      optimize(
+        binary(
+          "in",
+          core.intLiteral(3n),
+          core.arrayLiteral([core.intLiteral(1n), core.intLiteral(2n)]),
+        ),
+      ),
+      core.booleanLiteral(false),
+    );
   });
 
   it("handles unoptimizable unary expressions", () => {

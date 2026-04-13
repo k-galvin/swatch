@@ -16,11 +16,14 @@ Swatch {
               | ComponentDecl
               | WallStmt
               | PlaceStmt
-              | Exp9 "=" Exp ";"                               --assign
+              | Exp10 ("++" | "--") ";"                        --bump
+              | Exp10 "=" Exp ";"                              --assign
               | id "(" ListOf<Exp, ","> ")" ";"                --call
               | if Exp Block (else (Block | Statement))?       --if
+              | while Exp Block                                --while
               | repeat Exp Block                               --repeat
               | for id in Exp ("..." | "..<") Exp Block        --range
+              | for id in Exp Block                            --collection
               | break ";"                                      --break
 
   // --- Structural Declarations ---
@@ -57,40 +60,42 @@ Swatch {
               | Type "?"                                       --optional
               | id                                             --id
 
-  // --- Expression Logic (9-Level Precedence Hierarchy) ---
+  // --- Expression Logic (10-Level Precedence Hierarchy) ---
   // Used for calculating precise placements, offsets, and room scaling.
   Exp         = Exp1 "?" Exp1 ":" Exp                          --conditional
               | Exp1
-  Exp1        = Exp1 "||" Exp2                                 --or
+  Exp1        = Exp2 "??" Exp1                                 --coalesce
               | Exp2
-  Exp2        = Exp2 "&&" Exp3                                 --and
+  Exp2        = Exp2 "||" Exp3                                 --or
               | Exp3
-  Exp3        = Exp3 relop Exp4                                --compare
+  Exp3        = Exp3 "&&" Exp4                                 --and
               | Exp4
-  Exp4        = Exp4 addop Exp5                                --add
+  Exp4        = Exp4 relop Exp5                                --compare
               | Exp5
-  Exp5        = Exp5 mulop Exp6                                --multiply
+  Exp5        = Exp5 addop Exp6                                --add
               | Exp6
-  Exp6        = Exp7 "**" Exp6                                 --power
+  Exp6        = Exp6 mulop Exp7                                --multiply
               | Exp7
-  Exp7        = prefixop Exp8                                  --unary
+  Exp7        = Exp8 "**" Exp7                                 --power
               | Exp8
-  Exp8        = ~hexlit "#" Exp9                               --hash
-              | "random" Exp9                                  --random
+  Exp8        = prefixop Exp9                                  --unary
               | Exp9
-  Exp9        = true ~mut
+  Exp9        = ~hexlit "#" Exp10                              --hash
+              | "random" Exp10                                 --random
+              | Exp10
+  Exp10       = true ~mut
               | false ~mut
               | floatlit ~mut
               | intlit ~mut
               | hexlit ~mut
               | stringlit ~mut
               | "[" ListOf<Exp, ","> "]"                       --array
-              | Exp9 "(" ListOf<Exp, ","> ")" ~mut             --call
+              | Exp10 "(" ListOf<Exp, ","> ")" ~mut            --call
               | id                                             --id
               | "(" Exp ")" ~mut                               --parens
 
   // --- Lexical Rules ---
-  relop       = "<=" | "<" | "==" | "!=" | ">=" | ">"
+  relop       = "<=" | "<" | "==" | "!=" | ">=" | ">" | in
   addop       = "+" | "-"
   mulop       = "*" | "/" | "%"
   prefixop    = "-" | "!"
@@ -122,6 +127,7 @@ Swatch {
   const       = "const"     ~idchar
   if          = "if"        ~idchar
   else        = "else"      ~idchar
+  while       = "while"     ~idchar
   repeat      = "repeat"    ~idchar
   for         = "for"       ~idchar
   in          = "in"        ~idchar
@@ -131,7 +137,7 @@ Swatch {
   random      = "random"    ~idchar
 
   keyword     = designer | date | layout | size | wall | from | to 
-              | place | at | component | let | const | if | else 
+              | place | at | component | let | const | if | else | while
               | repeat | for | in | break | true | false | random
 
   // --- Character Classes & Whitespace ---
