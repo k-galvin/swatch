@@ -143,29 +143,44 @@ export default function optimize(node) {
             ? core.stringLiteral(String(leftValue) + String(rightValue))
             : core.floatLiteral(Number(leftValue) + Number(rightValue));
         }
-        if (node.op === "-") return core.floatLiteral(Number(leftValue) - Number(rightValue));
-        if (node.op === "*") return core.floatLiteral(Number(leftValue) * Number(rightValue));
-        if (node.op === "/") return core.floatLiteral(Number(leftValue) / Number(rightValue));
+        if (node.op === "-")
+          return core.floatLiteral(Number(leftValue) - Number(rightValue));
+        if (node.op === "*")
+          return core.floatLiteral(Number(leftValue) * Number(rightValue));
+        if (node.op === "/")
+          return core.floatLiteral(Number(leftValue) / Number(rightValue));
         if (node.op === "**") {
-          return core.floatLiteral(Math.pow(Number(leftValue), Number(rightValue)));
+          return core.floatLiteral(
+            Math.pow(Number(leftValue), Number(rightValue)),
+          );
         }
         if (node.op === "<") return core.booleanLiteral(leftValue < rightValue);
-        if (node.op === "<=") return core.booleanLiteral(leftValue <= rightValue);
-        if (node.op === "==") return core.booleanLiteral(leftValue === rightValue);
-        if (node.op === "!=") return core.booleanLiteral(leftValue !== rightValue);
-        if (node.op === ">=") return core.booleanLiteral(leftValue >= rightValue);
+        if (node.op === "<=")
+          return core.booleanLiteral(leftValue <= rightValue);
+        if (node.op === "==")
+          return core.booleanLiteral(leftValue === rightValue);
+        if (node.op === "!=")
+          return core.booleanLiteral(leftValue !== rightValue);
+        if (node.op === ">=")
+          return core.booleanLiteral(leftValue >= rightValue);
         if (node.op === ">") return core.booleanLiteral(leftValue > rightValue);
-        if (node.op === "&&") return core.booleanLiteral(leftValue && rightValue);
-        if (node.op === "||") return core.booleanLiteral(leftValue || rightValue);
+        if (node.op === "&&")
+          return core.booleanLiteral(leftValue && rightValue);
+        if (node.op === "||")
+          return core.booleanLiteral(leftValue || rightValue);
       }
       if (node.op === "in") {
         if (
           node.left.kind?.includes("Literal") &&
           node.right.kind === "ArrayLiteral" &&
-          node.right.elements.every((element) => element.kind?.includes("Literal"))
+          node.right.elements.every((element) =>
+            element.kind?.includes("Literal"),
+          )
         ) {
           const leftValue = node.left.value;
-          const elementValues = node.right.elements.map((element) => element.value);
+          const elementValues = node.right.elements.map(
+            (element) => element.value,
+          );
           return core.booleanLiteral(elementValues.includes(leftValue));
         }
       }

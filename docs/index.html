@@ -417,6 +417,62 @@ Layout "Commercial Kitchen" size [800, 800] {
                 <img src="kitchen.svg" alt="Structural Shell SVG" />
               </div>
             </div>
+
+            <!-- Example 6: Generative Art -->
+            <div class="ex-card">
+              <div class="ex-info">
+                <span class="eyebrow">Advanced Generative</span>
+                <h3>06 / Generative Logic</h3>
+                <p>
+                  Showcasing while loops, nullish coalescing, and membership
+                  checks to create an algorithmic dot-grid installation.
+                </p>
+              </div>
+              <div class="ex-code-container">
+                <pre><code>Designer "Generative Artist" Date "2026-04-13"
+
+const PRIMARY = #3498db;
+const ACCENT = #e74c3c;
+
+component Pattern(x: float, y: float, theme: color?) {
+  // Use coalesce to provide a default theme color
+  let c = theme ?? PRIMARY;
+  
+  let i = 0;
+  while i < 3 {
+    let radius = 10.0 + i * 10.0;
+    i++; // Bumping operator
+    place Dot at [x + radius, y] [color: c, width: 10];
+  }
+}
+
+Layout "Generative Pattern" size [600, 600] {
+  let x = 50.0;
+  while x < 550.0 {
+    let y = 50.0;
+    while y < 550.0 {
+      let isEdge = (x < 100.0 || x > 500.0);
+      if (isEdge) {
+        Pattern(x, y, #95a5a6);
+      } else {
+        Pattern(x, y, no color);
+      }
+      y = y + 150.0;
+    }
+    x = x + 150.0;
+  }
+  
+  // Showcase break and collection loop
+  for val in [100, 200, 300, 400, 500] {
+    if (val > 300) { break; }
+    Wall marker from [val, 580] to [val + 20, 580] [color: ACCENT];
+  }
+}</code></pre>
+              </div>
+              <div class="ex-visual">
+                <img src="generative.svg" alt="Generative Pattern SVG" />
+              </div>
+            </div>
           </div>
         </div>
       </section>

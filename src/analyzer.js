@@ -410,7 +410,9 @@ export default function analyze(match) {
         layoutSize: null,
         placedEntities: [],
       });
-      componentEntity.params = params.asIteration().children.map((p) => p.rep());
+      componentEntity.params = params
+        .asIteration()
+        .children.map((p) => p.rep());
       componentEntity.body = block.rep();
       context = context.parent;
       return componentEntity;
@@ -430,7 +432,12 @@ export default function analyze(match) {
       const thickness = properties.thickness;
       mustBeWithinBounds(startPoint, { at: p1 }, thickness);
       mustBeWithinBounds(endPoint, { at: p2 }, thickness);
-      const wallEntity = core.wall(id.sourceString, startPoint, endPoint, properties);
+      const wallEntity = core.wall(
+        id.sourceString,
+        startPoint,
+        endPoint,
+        properties,
+      );
       mustNotOverlap(wallEntity, { at: id });
       return wallEntity;
     },
@@ -438,7 +445,8 @@ export default function analyze(match) {
     PlaceStmt(_place, id, _at, p, props, _semi) {
       const placementPoint = p.rep();
       const properties = props.rep()[0] ?? {};
-      const placementSize = properties.size ?? properties.width ?? core.intLiteral(40n);
+      const placementSize =
+        properties.size ?? properties.width ?? core.intLiteral(40n);
       mustBeWithinBounds(placementPoint, { at: p }, placementSize);
 
       const entity = context.lookup(id.sourceString);
@@ -447,7 +455,11 @@ export default function analyze(match) {
           ? entity
           : id.sourceString;
 
-      const furnitureEntity = core.furniture(furnitureType, placementPoint, properties);
+      const furnitureEntity = core.furniture(
+        furnitureType,
+        placementPoint,
+        properties,
+      );
       mustNotOverlap(furnitureEntity, { at: id });
       return furnitureEntity;
     },
@@ -579,6 +591,10 @@ export default function analyze(match) {
     Exp10(node) {
       return node.rep();
     },
+    Exp10_no(_no, typeNode) {
+      const type = typeNode.rep();
+      return { kind: "EmptyOptionalLiteral", type: core.optionalType(type) };
+    },
     Exp10_array(_open, elements, _close) {
       return core.arrayLiteral(
         elements.asIteration().children.map((element) => element.rep()),
@@ -601,7 +617,8 @@ export default function analyze(match) {
           ),
         );
       }
-      const callType = callee.kind === "Component" ? core.voidType : callee.type;
+      const callType =
+        callee.kind === "Component" ? core.voidType : callee.type;
       return core.call(callee, parsedArgs, callType);
     },
     Exp10_id(idNode) {

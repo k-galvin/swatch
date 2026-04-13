@@ -356,6 +356,38 @@ describe("The Generator", () => {
     assert.match(output, /cx="42" cy="42"/);
   });
 
+  it("covers unknown node kind in evaluate()", () => {
+    const program = core.program(null, [
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(core.variable("x", false, core.anyType), {
+            kind: "UnknownKind",
+          }),
+        ],
+      ),
+    ]);
+    const output = generate(program);
+    assert.ok(output.includes("<svg"));
+  });
+
+  it("covers EmptyOptionalLiteral in evaluate()", () => {
+    const program = core.program(null, [
+      core.layout(
+        "L",
+        [core.intLiteral(100n), core.intLiteral(100n)],
+        [
+          core.variableDeclaration(core.variable("x", false, core.optionalType(core.intType)), {
+            kind: "EmptyOptionalLiteral",
+          }),
+        ],
+      ),
+    ]);
+    const output = generate(program);
+    assert.ok(output.includes("<svg"));
+  });
+
   it("covers in operator with non-array in evaluate()", () => {
     const program = core.program(null, [
       core.layout(

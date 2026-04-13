@@ -48,7 +48,9 @@ async function main() {
     }
   } catch (error) {
     // Report errors in bold red for better CLI visibility.
-    console.error(`\x1b[31m\x1b[1mError:\x1b[0m \x1b[31m${error.message}\x1b[0m`);
+    console.error(
+      `\x1b[31m\x1b[1mError:\x1b[0m \x1b[31m${error.message}\x1b[0m`,
+    );
     process.exitCode = 1;
   }
 }

@@ -70,6 +70,7 @@ const semanticChecks = [
     "Layout L size [1000, 1000] { place Faucet at [100, 100]; place TV at [200, 200]; place Node at [300, 300]; place Bench at [400, 400]; place Dot at [500, 500]; place Pillar at [600, 600]; place Post at [700, 700]; place Section at [800, 800]; }",
   ],
   ["terminal coverage", "print(π);"],
+  ["no literal coverage", "let x: float? = no float;"],
 ];
 
 const semanticErrors = [

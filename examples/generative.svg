@@ -1,4 +1,4 @@
-<svg id="Pattern_1" width="600" height="640" viewBox="0 0 600 640" xmlns="http://www.w3.org/2000/svg">
+<svg id="Generative Pattern_1" width="600" height="640" viewBox="0 0 600 640" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
       <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f0f0f0" stroke-width="1"/>
@@ -16,216 +16,352 @@
   <rect x="0" y="600" width="100%" height="40" fill="#f9f9f9" />
   <line x1="0" y1="600" x2="600" y2="600" stroke="#eee" stroke-width="1" />
   <text x="15" y="625" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#888">
-    DESIGNER: Artist | DATE: 2026-03-18 | Pattern_1
+    DESIGNER: Generative Artist | DATE: 2026-04-13 | Generative Pattern_1
   </text>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="60" y="60" width="40" height="40" fill="#ff0000" rx="6" />
+    <rect x="55" y="45" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="140" y="60" width="40" height="40" fill="#ff0000" rx="6" />
+    <rect x="65" y="45" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="220" y="60" width="40" height="40" fill="#ff0000" rx="6" />
+    <rect x="75" y="45" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="300" y="60" width="40" height="40" fill="#ff0000" rx="6" />
+    <rect x="55" y="195" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="60" width="40" height="40" fill="#ff0000" rx="6" />
+    <rect x="65" y="195" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="80" y="130" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="75" y="195" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="80" y="230" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="55" y="345" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="80" y="330" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="65" y="345" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="80" y="430" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="75" y="345" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="80" y="530" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="55" y="495" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="180" y="130" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="65" y="495" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="180" y="230" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="75" y="495" width="10" height="10" fill="#95a5a6" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="180" y="330" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="205" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="180" y="430" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="215" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="180" y="530" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="225" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="280" y="130" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="205" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="280" y="230" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="215" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="280" y="330" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="225" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="280" y="430" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="205" y="345" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="280" y="530" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="215" y="345" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="130" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="225" y="345" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="230" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="205" y="495" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="330" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="215" y="495" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="430" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="225" y="495" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="380" y="530" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="355" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="480" y="130" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="365" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="480" y="230" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="375" y="45" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="480" y="330" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="355" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="480" y="430" width="40" height="40" fill="#aaaaaa" rx="6" />
+    <rect x="365" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
   <g class="furniture" filter="url(#shadow)">
-    <rect x="480" y="530" width="40" height="40" fill="#000000" rx="6" />
+    <rect x="375" y="195" width="10" height="10" fill="#3498db" rx="6" />
   </g>
-  <g transform="translate(80, 112)">
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="355" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="365" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="375" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="355" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="365" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="375" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="505" y="45" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="515" y="45" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="525" y="45" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="505" y="195" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="515" y="195" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="525" y="195" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="505" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="515" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="525" y="345" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="505" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="515" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <g class="furniture" filter="url(#shadow)">
+    <rect x="525" y="495" width="10" height="10" fill="#3498db" rx="6" />
+  </g>
+  <line x1="100" y1="580" x2="120" y2="580" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" />
+  <line x1="100" y1="580" x2="120" y2="580" stroke="white" stroke-width="3.2" stroke-linecap="round" opacity="0.3" />
+  <line x1="200" y1="580" x2="220" y2="580" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" />
+  <line x1="200" y1="580" x2="220" y2="580" stroke="white" stroke-width="3.2" stroke-linecap="round" opacity="0.3" />
+  <line x1="300" y1="580" x2="320" y2="580" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" />
+  <line x1="300" y1="580" x2="320" y2="580" stroke="white" stroke-width="3.2" stroke-linecap="round" opacity="0.3" />
+  <line x1="400" y1="580" x2="420" y2="580" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" />
+  <line x1="400" y1="580" x2="420" y2="580" stroke="white" stroke-width="3.2" stroke-linecap="round" opacity="0.3" />
+  <line x1="500" y1="580" x2="520" y2="580" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" />
+  <line x1="500" y1="580" x2="520" y2="580" stroke="white" stroke-width="3.2" stroke-linecap="round" opacity="0.3" />
+  <g transform="translate(60, 67)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
     <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(160, 112)">
+  <g transform="translate(70, 82)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
     <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(240, 112)">
+  <g transform="translate(80, 97)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
     <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(320, 112)">
+  <g transform="translate(60, 217)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
     <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 112)">
+  <g transform="translate(70, 232)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
     <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(100, 182)">
+  <g transform="translate(80, 247)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(100, 282)">
+  <g transform="translate(60, 367)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(100, 382)">
+  <g transform="translate(70, 382)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(100, 482)">
+  <g transform="translate(80, 397)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(100, 582)">
+  <g transform="translate(60, 517)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(200, 182)">
+  <g transform="translate(70, 532)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(200, 282)">
+  <g transform="translate(80, 547)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(200, 382)">
+  <g transform="translate(210, 67)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(200, 482)">
+  <g transform="translate(220, 82)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(200, 582)">
+  <g transform="translate(230, 97)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(300, 182)">
+  <g transform="translate(210, 217)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(300, 282)">
+  <g transform="translate(220, 232)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(300, 382)">
+  <g transform="translate(230, 247)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(300, 482)">
+  <g transform="translate(210, 367)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(300, 582)">
+  <g transform="translate(220, 382)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 182)">
+  <g transform="translate(230, 397)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 282)">
+  <g transform="translate(210, 517)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 382)">
+  <g transform="translate(220, 532)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 482)">
+  <g transform="translate(230, 547)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(400, 582)">
+  <g transform="translate(360, 67)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(500, 182)">
+  <g transform="translate(370, 82)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(500, 282)">
+  <g transform="translate(380, 97)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(500, 382)">
+  <g transform="translate(360, 217)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(500, 482)">
+  <g transform="translate(370, 232)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
-  <g transform="translate(500, 582)">
+  <g transform="translate(380, 247)">
     <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
-    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Node</text>
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(360, 367)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(370, 382)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(380, 397)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(360, 517)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(370, 532)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(380, 547)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(510, 67)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(520, 82)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(530, 97)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(510, 217)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(520, 232)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(530, 247)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(510, 367)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(520, 382)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(530, 397)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(510, 517)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(520, 532)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
+  </g>
+  <g transform="translate(530, 547)">
+    <rect x="-30" y="-8" width="60" height="12" fill="white" fill-opacity="0.9" rx="4" />
+    <text font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#333">Dot</text>
   </g>
 </svg>

@@ -47,18 +47,30 @@ export default function generate(program) {
         const rightNum = Number(rightVal);
 
         switch (node.op) {
-          case "-": return leftNum - rightNum;
-          case "*": return leftNum * rightNum;
-          case "/": return leftNum / rightNum;
-          case "**": return Math.pow(leftNum, rightNum);
-          case "<": return leftNum < rightNum;
-          case "==": return leftNum === rightNum;
-          case "&&": return leftNum && rightNum;
-          case "||": return leftNum || rightNum;
-          case "??": return leftVal ?? rightVal;
-          case "in": return Array.isArray(rightVal) ? rightVal.includes(leftVal) : false;
-          case "%": return leftNum % rightNum;
-          default: return 0;
+          case "-":
+            return leftNum - rightNum;
+          case "*":
+            return leftNum * rightNum;
+          case "/":
+            return leftNum / rightNum;
+          case "**":
+            return Math.pow(leftNum, rightNum);
+          case "<":
+            return leftNum < rightNum;
+          case "==":
+            return leftNum === rightNum;
+          case "&&":
+            return leftNum && rightNum;
+          case "||":
+            return leftNum || rightNum;
+          case "??":
+            return leftVal ?? rightVal;
+          case "in":
+            return Array.isArray(rightVal) ? rightVal.includes(leftVal) : false;
+          case "%":
+            return leftNum % rightNum;
+          default:
+            return 0;
         }
       }
 
@@ -81,6 +93,9 @@ export default function generate(program) {
       case "ColorLiteral":
         return node.value;
 
+      case "EmptyOptionalLiteral":
+        return null;
+
       case "ArrayLiteral":
         return node.elements.map((element) => evaluate(element, context));
     }
@@ -92,7 +107,9 @@ export default function generate(program) {
    * Handles loop control signals (e.g., "BREAK").
    */
   function execute(statementsInput, context, labelQueue = null) {
-    const statements = Array.isArray(statementsInput) ? statementsInput : [statementsInput];
+    const statements = Array.isArray(statementsInput)
+      ? statementsInput
+      : [statementsInput];
 
     for (const statement of statements) {
       if (!statement) continue;
@@ -100,7 +117,10 @@ export default function generate(program) {
 
       switch (statement.kind) {
         case "VariableDeclaration":
-          context.set(statement.variable, evaluate(statement.initializer, context));
+          context.set(
+            statement.variable,
+            evaluate(statement.initializer, context),
+          );
           break;
 
         case "Assignment":
@@ -109,13 +129,18 @@ export default function generate(program) {
 
         case "BumpStatement": {
           const currentVal = Number(evaluate(statement.variable, context));
-          context.set(statement.variable, statement.op === "++" ? currentVal + 1 : currentVal - 1);
+          context.set(
+            statement.variable,
+            statement.op === "++" ? currentVal + 1 : currentVal - 1,
+          );
           break;
         }
 
         case "IfStatement": {
           const result = execute(
-            evaluate(statement.test, context) ? statement.consequent : statement.alternate,
+            evaluate(statement.test, context)
+              ? statement.consequent
+              : statement.alternate,
             context,
             labelQueue,
           );
@@ -141,7 +166,11 @@ export default function generate(program) {
         case "ForRangeStatement": {
           const low = Number(evaluate(statement.low, context));
           const high = Number(evaluate(statement.high, context));
-          for (let i = low; statement.op === "..." ? i <= high : i < high; i++) {
+          for (
+            let i = low;
+            statement.op === "..." ? i <= high : i < high;
+            i++
+          ) {
             context.set(statement.iterator, i);
             if (execute(statement.body, context, labelQueue) === "BREAK") break;
           }
@@ -270,7 +299,9 @@ export default function generate(program) {
           const endX = Number(evaluate(statement.to[0], context));
           const endY = Number(evaluate(statement.to[1], context));
           const color = evaluate(statement.props?.color, context) ?? "#2c3e50";
-          const thickness = Number(evaluate(statement.props?.thickness, context) ?? 8);
+          const thickness = Number(
+            evaluate(statement.props?.thickness, context) ?? 8,
+          );
 
           // Architectural double-line wall effect
           svgLines.push(
@@ -287,7 +318,8 @@ export default function generate(program) {
           const centerY = Number(evaluate(statement.at[1], context));
           const color = evaluate(statement.props?.color, context) ?? "#3498db";
           const typeValue = String(evaluate(statement.type, context));
-          const labelText = evaluate(statement.props?.label, context) ?? typeValue;
+          const labelText =
+            evaluate(statement.props?.label, context) ?? typeValue;
           const dimension = Number(
             evaluate(statement.props?.size, context) ??
               evaluate(statement.props?.width, context) ??
@@ -297,24 +329,45 @@ export default function generate(program) {
 
           svgLines.push(`  <g class="furniture" filter="url(#shadow)">`);
           const archetype = typeValue.toLowerCase();
-          
+
           if (archetype.includes("chair") || archetype.includes("stool")) {
-            svgLines.push(`    <circle cx="${centerX}" cy="${centerY}" r="${half}" fill="${color}" />`);
-          } else if (archetype.includes("table") || archetype.includes("desk")) {
-            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="2" />`);
+            svgLines.push(
+              `    <circle cx="${centerX}" cy="${centerY}" r="${half}" fill="${color}" />`,
+            );
+          } else if (
+            archetype.includes("table") ||
+            archetype.includes("desk")
+          ) {
+            svgLines.push(
+              `    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="2" />`,
+            );
           } else if (archetype.includes("bed")) {
-            svgLines.push(`    <rect x="${centerX - dimension * 0.75}" y="${centerY - half}" width="${dimension * 1.5}" height="${dimension}" fill="${color}" rx="4" />`);
-            svgLines.push(`    <rect x="${centerX - dimension * 0.75 + 5}" y="${centerY - half + 5}" width="20" height="${dimension - 10}" fill="white" opacity="0.2" rx="2" />`);
+            svgLines.push(
+              `    <rect x="${centerX - dimension * 0.75}" y="${centerY - half}" width="${dimension * 1.5}" height="${dimension}" fill="${color}" rx="4" />`,
+            );
+            svgLines.push(
+              `    <rect x="${centerX - dimension * 0.75 + 5}" y="${centerY - half + 5}" width="20" height="${dimension - 10}" fill="white" opacity="0.2" rx="2" />`,
+            );
           } else if (archetype.includes("sink")) {
-            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="4" />`);
-            svgLines.push(`    <circle cx="${centerX}" cy="${centerY}" r="${half * 0.7}" fill="white" opacity="0.2" />`);
+            svgLines.push(
+              `    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="4" />`,
+            );
+            svgLines.push(
+              `    <circle cx="${centerX}" cy="${centerY}" r="${half * 0.7}" fill="white" opacity="0.2" />`,
+            );
           } else {
-            svgLines.push(`    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="6" />`);
+            svgLines.push(
+              `    <rect x="${centerX - half}" y="${centerY - half}" width="${dimension}" height="${dimension}" fill="${color}" rx="6" />`,
+            );
           }
           svgLines.push(`  </g>`);
 
           if (labelQueue) {
-            labelQueue.push({ cx: centerX, cy: centerY + half + 12, text: labelText });
+            labelQueue.push({
+              cx: centerX,
+              cy: centerY + half + 12,
+              text: labelText,
+            });
           }
           break;
         }

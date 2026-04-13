@@ -13,7 +13,7 @@ Swatch was born from the need for a simple, declarative way to describe architec
 ## Features
 
 - **Declarative Layouts**: Define spaces with clear `Layout`, `Wall`, and `place` commands.
-- **Generative Power**: Use `for` and `repeat` loops to automate repetitive architectural patterns.
+- **Generative Power**: Use `for`, `while`, and `repeat` loops to automate repetitive architectural patterns.
 - **Reusable Components**: Define custom `component` blocks to modularize furniture sets or wall configurations.
 - **Spatial Types**: Native support for spatial coordinates, units (`CM`, `INCH`, `PT`), and hex colors.
 - **Precise Expressions**: Full support for arithmetic, logical, and conditional expressions in properties and coordinates.
@@ -41,7 +41,7 @@ The Swatch compiler performs a rigorous semantic analysis to ensure that every p
 
 - **Spatial Logic**: A standout feature of the Swatch analyzer. It calculates the physical bounding boxes of all elements, preventing furniture from overlapping with walls (unless specifically allowed as integrated fixtures).
 - **Boundary Enforcement**: Validates that all coordinates, when accounting for wall thickness or furniture size, remain strictly within the layout's physical dimensions.
-- **Loop Integrity**: Validates that `repeat` counts and `for` range bounds evaluate to numeric types.
+- **Loop Integrity**: Validates that `repeat` counts and `for` range bounds evaluate to numeric types. Collection `for-in` loops are verified to iterate over arrays.
 - **Contextual Legality**: Restricts the use of the `break` statement to the lexical interior of loop constructs.
 - **Immutability Enforcement**: Prevents reassignment to constants (e.g., variables declared with `const` or loop iterators).
 - **Component Signature Validation**: Verifies that calls to components provide the correct number of arguments and that each argument's type is assignable to the corresponding parameter.

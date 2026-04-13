@@ -1,19 +1,47 @@
-Designer "Artist" Date "2026-03-18"
+Designer "Generative Artist" Date "2026-04-13"
 
-Layout "Pattern" size [600, 600] {
-  let count = 0;
-  repeat 5 {
-    count = count + 1;
-    // Shifted down and right to avoid clipping
-    place Dot at [count * 80, 80] [color: #ff0000];
+const BACKGROUND = #f8f9fa;
+const PRIMARY = #3498db;
+const ACCENT = #e74c3c;
+
+component Pattern(x: float, y: float, theme: color?) {
+  // Use coalesce to provide a default theme color
+  let c = theme ?? PRIMARY;
+  
+  let i = 0;
+  while i < 3 {
+    let radius = 10.0 + i * 10.0;
+    // Bumping operator
+    i++;
+    place Dot at [x + radius, y] [color: c, width: 10];
   }
+}
 
-  for i in 0 ... 4 {
-    for j in 0 ... 4 {
-      let x = 100.0 + i * 100.0;
-      let y = 150.0 + j * 100.0;
-      let isEven = (i + j) % 2 == 0;
-      place Node at [x, y] [color: isEven ? #000000 : #aaaaaa];
+Layout "Generative Pattern" size [600, 600] {
+  let colors = [PRIMARY, ACCENT, #2ecc71];
+  let x = 50.0;
+  
+  while x < 550.0 {
+    let y = 50.0;
+    while y < 550.0 {
+      // Logic with 'in' operator
+      let isEdge = (x < 100.0 || x > 500.0);
+      
+      if (isEdge) {
+        Pattern(x, y, #95a5a6);
+      } else {
+        Pattern(x, y, no color);
+      }
+      
+      y = y + 150.0;
     }
+    x = x + 150.0;
+  }
+  
+  // Showcase break
+  let count = 0;
+  for val in [100, 200, 300, 400, 500] {
+    if (val > 300) { break; }
+    Wall bottomMarker from [val, 580] to [val + 20, 580] [color: ACCENT];
   }
 }

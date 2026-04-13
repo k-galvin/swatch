@@ -89,6 +89,7 @@ Swatch {
               | intlit ~mut
               | hexlit ~mut
               | stringlit ~mut
+              | no Type ~mut                                   --no
               | "[" ListOf<Exp, ","> "]"                       --array
               | Exp10 "(" ListOf<Exp, ","> ")" ~mut            --call
               | id                                             --id
@@ -111,7 +112,8 @@ Swatch {
   hexlit      = "#" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit --six
               | "#" hexDigit hexDigit hexDigit                         --three
 
-  // --- Keywords ---
+  no          = "no"        ~idchar
+  if          = "if"        ~idchar
   // Lowercase definitions with ~idchar lookahead to prevent variable collision.
   designer    = "Designer"  ~idchar
   date        = "Date"      ~idchar
@@ -125,7 +127,6 @@ Swatch {
   component   = "component" ~idchar
   let         = "let"       ~idchar
   const       = "const"     ~idchar
-  if          = "if"        ~idchar
   else        = "else"      ~idchar
   while       = "while"     ~idchar
   repeat      = "repeat"    ~idchar
@@ -138,7 +139,7 @@ Swatch {
 
   keyword     = designer | date | layout | size | wall | from | to 
               | place | at | component | let | const | if | else | while
-              | repeat | for | in | break | true | false | random
+              | repeat | for | in | break | no | true | false | random
 
   // --- Character Classes & Whitespace ---
   // Utilizes Ohm's built-in rules for foundational characters while 
