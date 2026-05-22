@@ -44,6 +44,10 @@
   ],
   "author": "Kate Galvin",
   "license": "MIT",
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.0.5"
+  },
   "dependencies": {
     "graph-stringify": "^1.1.0",
     "ohm-js": "^17.5.0"

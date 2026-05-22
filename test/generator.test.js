@@ -378,9 +378,12 @@ describe("The Generator", () => {
         "L",
         [core.intLiteral(100n), core.intLiteral(100n)],
         [
-          core.variableDeclaration(core.variable("x", false, core.optionalType(core.intType)), {
-            kind: "EmptyOptionalLiteral",
-          }),
+          core.variableDeclaration(
+            core.variable("x", false, core.optionalType(core.intType)),
+            {
+              kind: "EmptyOptionalLiteral",
+            },
+          ),
         ],
       ),
     ]);
